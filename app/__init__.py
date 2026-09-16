@@ -1,11 +1,12 @@
 from flask import Flask, render_template
 from app.config import Config
-from app.extensions import csrf
+from app.extensions import csrf, limiter
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
     csrf.init_app(app)
+    limiter.init_app(app)
 
     from app.blueprints.public import public_bp
     from app.blueprints.auth import auth_bp

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Login History</h2>
+<table class="table table-striped">
+<tr><th>Date</th><th>IP Address</th><th>User Agent</th><th>Status</th></tr>
+{% for log in logs %}
+<tr><td>{{ log.LoginAt }}</td><td>{{ log.IPAddress }}</td><td>{{ log.UserAgent }}</td><td>{{ log.Status }}</td></tr>
+{% endfor %}
+</table>
+{% endblock %}

@@ -6,3 +6,6 @@ botocore==1.33.0
 pytest==7.4.3
 gunicorn==21.2.0
 reportlab==4.0.7
+moto==5.2.3
+Flask-Limiter==3.5.0
+email-validator==2.1.0.post1

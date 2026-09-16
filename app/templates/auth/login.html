@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="text-center">Log In</h2>
+<form method="POST" class="w-50 mx-auto">
+{{ form.hidden_tag() }}
+{{ form.email.label }} {{ form.email(class="form-control") }}
+{{ form.password.label }} {{ form.password(class="form-control") }}
+{{ form.remember_me() }} {{ form.remember_me.label }}
+<br><br>
+{{ form.submit(class="btn btn-primary") }}
+<div><a href="{{ url_for('auth.forgot_password') }}">Forgot Password?</a></div>
+</form>
+{% endblock %}

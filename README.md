@@ -11,3 +11,4 @@ Production-Grade Cloud Healthcare Management System (AWS Cloud Practitioner Caps
 ## Phases Completed
 - **Phase 1 (Scaffold):** Set up Flask application factory, blueprints, error pages, and design system.
 - **Phase 2 (Database):** Created DynamoDB schema scripts, repository layer with exponential backoff, and admin seed script.
+- **Phase 3 (Auth):** Implemented registration, login, lockouts, OTP, audit logging, and role-based routing.
