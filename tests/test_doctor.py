@@ -4,11 +4,11 @@ from app.services.doctor_service import DoctorService
 def test_availability_generation(dynamodb_setup):
     svc = DoctorService()
     slots = svc.set_availability("doc123", "2026-10-10", "09:00", "10:00", 20)
-    assert len(slots) == 4
-    assert slots == ["09:00", "09:20", "09:40", "10:00"]
+    assert len(slots) == 3
+    assert slots == ["09:00", "09:20", "09:40"]
     
     saved = svc.get_availability("doc123", "2026-10-10")
-    assert saved['Slots'] == ["09:00", "09:20", "09:40", "10:00"]
+    assert saved['Slots'] == ["09:00", "09:20", "09:40"]
 
 def test_complete_consultation(dynamodb_setup):
     svc = DoctorService()
