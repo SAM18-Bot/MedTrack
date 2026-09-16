@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
-from app.utils import login_required, role_required
+from app.utils import login_required, role_required, owns_record
 from app.forms.doctor_forms import DoctorProfileForm, AvailabilityForm, ConsultationForm
 from app.services.doctor_service import DoctorService
 
@@ -67,8 +67,12 @@ def queue():
     return render_template('doctor/queue.html', queue=q, date=date_str)
 
 @doctor_bp.route('/queue/<id>/status', methods=['POST'])
+@owns_record(lambda id: DoctorService().get_appointment(id), owner_field='DoctorID', id_kwarg='id')
 def update_status(id):
     status = request.form.get('status')
+    if status not in ['Pending', 'Confirmed', 'Completed', 'Cancelled', 'NoShow']:
+        flash('Invalid status.', 'danger')
+        return redirect(url_for('doctor.queue'))
     svc = DoctorService()
     svc.update_appointment_status(id, status)
     flash(f'Status updated to {status}.', 'success')
@@ -100,5 +104,8 @@ def reviews(): return render_template('doctor/reviews.html')
 def revenue(): return render_template('doctor/revenue.html')
 
 @doctor_bp.route('/patients/<id>')
+@owns_record(lambda id: DoctorService().get_appointment(id), owner_field='DoctorID', id_kwarg='id')
 def patient_detail(id):
-    return f"Patient Detail {id}"
+    svc = DoctorService()
+    appt = svc.get_appointment(id)
+    return render_template('doctor/patient_detail.html', appointment=appt)

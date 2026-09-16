@@ -117,6 +117,9 @@ class PatientService:
     def get_documents(self, patient_id):
         return self.doc_upload_repo.get_patient_documents(patient_id)
 
+    def get_document_by_id(self, doc_id):
+        return self.doc_upload_repo.get_item(self.doc_upload_repo.TABLE, {'DocumentID': doc_id})
+
     def upload_document(self, patient_id, title, file_obj, filename):
         doc_id = str(uuid.uuid4())
         ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'bin'

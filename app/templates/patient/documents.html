@@ -15,7 +15,7 @@
             {% for doc in documents %}
             <tr>
                 <td>{{ doc.Title }}</td><td>{{ doc.UploadedAt }}</td>
-                <td><a href="{{ url_for('patient.download_document', s3_key=doc.S3Key) }}" target="_blank" class="btn btn-sm btn-info">View / Download</a></td>
+                <td><a href="{{ url_for('patient.download_document', doc_id=doc.DocumentID) }}" target="_blank" class="btn btn-sm btn-info">View / Download</a></td>
             </tr>
             {% else %}<tr><td colspan="3">No documents uploaded.</td></tr>{% endfor %}
         </table>

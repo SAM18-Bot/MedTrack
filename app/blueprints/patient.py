@@ -1,6 +1,6 @@
 import json
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
-from app.utils import login_required, role_required, DecimalEncoder
+from app.utils import login_required, role_required, DecimalEncoder, owns_record
 from app.forms.patient_forms import ProfileForm, DoctorSearchForm, BookingForm, VitalsForm, DocumentUploadForm
 from app.services.patient_service import PatientService
 
@@ -89,6 +89,7 @@ def appointments():
     return render_template('patient/appointments.html', appointments=appts)
 
 @patient_bp.route('/appointments/<id>/cancel', methods=['POST'])
+@owns_record(lambda id: __import__('app.services.doctor_service', fromlist=['DoctorService']).DoctorService().get_appointment(id), owner_field='PatientID', id_kwarg='id')
 def cancel_appointment(id):
     svc = PatientService()
     svc.cancel_appointment(id)
@@ -130,18 +131,24 @@ def documents():
     rxs = svc.get_prescriptions(session['user_id'])
     return render_template('patient/documents.html', form=form, documents=docs, prescriptions=rxs)
 
-@patient_bp.route('/documents/download')
-def download_document():
+@patient_bp.route('/documents/<doc_id>/download')
+@owns_record(lambda doc_id: __import__('app.services.patient_service', fromlist=['PatientService']).PatientService().get_document_by_id(doc_id), owner_field='PatientID', id_kwarg='doc_id')
+def download_document(doc_id):
     from app.services.patient_service import PatientService
     svc = PatientService()
-    s3_key = request.args.get('s3_key')
-    url = svc.get_document_url(s3_key)
+    doc = svc.get_document_by_id(doc_id)
+    if not doc:
+        flash("Document not found.", "danger")
+        return redirect(url_for('patient.documents'))
+        
+    url = svc.get_document_url(doc['S3Key'])
     if url:
         return redirect(url)
     flash("Could not generate secure link.", "danger")
     return redirect(url_for('patient.documents'))
 
 @patient_bp.route('/prescriptions/<rx_id>/download')
+@owns_record(lambda rx_id: __import__('app.services.patient_service', fromlist=['PatientService']).PatientService().get_prescription_by_id(rx_id), owner_field='PatientID', id_kwarg='rx_id')
 def download_prescription(rx_id):
     from app.services.patient_service import PatientService
     from app.services.pdf_service import PdfService
@@ -149,8 +156,6 @@ def download_prescription(rx_id):
     pdf_svc = PdfService()
     
     rx = svc.get_prescription_by_id(rx_id)
-    if not rx or rx['PatientID'] != session['user_id']:
-        return "Unauthorized", 403
         
     # Generate PDF, upload to S3, get url
     s3_key = pdf_svc.generate_and_upload_prescription(rx_id, "Doctor", "Patient", rx.get('Medicines', ''), rx.get('CreatedAt', ''))
