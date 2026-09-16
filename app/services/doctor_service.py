@@ -79,6 +79,8 @@ class DoctorService:
         return self.appt_repo.get_item(self.appt_repo.TABLE, {"AppointmentID": appt_id})
 
     def update_appointment_status(self, appt_id, status):
+        if status in ['Cancelled', 'NoShow']:
+            self.appt_repo.release_slot_lock(appt_id)
         self.appt_repo.update_item(
             self.appt_repo.TABLE,
             {"AppointmentID": appt_id},

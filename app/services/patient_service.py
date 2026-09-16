@@ -90,6 +90,7 @@ class PatientService:
         return appt
 
     def cancel_appointment(self, appt_id):
+        self.appointment_repo.release_slot_lock(appt_id)
         self.appointment_repo.update_item(
             self.appointment_repo.TABLE,
             {"AppointmentID": appt_id},

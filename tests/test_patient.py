@@ -35,3 +35,22 @@ def test_patient_update_profile_reserved_keyword(dynamodb_setup):
     assert updated['Name'] == 'Updated Pat'
     assert updated['Address'] == '123 New St'
     assert updated['Status'] == 'Active'
+
+def test_cancel_releases_slot_lock(dynamodb_setup):
+    auth = AuthService()
+    auth.register_patient("Pat Lock", "plock@p.com", "123", "Pass123!")
+    auth.register_doctor("Doc Lock", "dlock@d.com", "123", "Cardio", "12345", "Pass123!")
+    p_user = auth.user_repo.get_user_by_email('plock@p.com')
+    d_user = auth.user_repo.get_user_by_email('dlock@d.com')
+
+    auth.doctor_repo.update_item(auth.doctor_repo.TABLE, {'DoctorID': d_user['UserID']}, "SET #st = :s", {':s': 'Approved'}, {'#st': 'Status'})
+
+    svc = PatientService()
+    appt = svc.book_appointment(p_user['UserID'], d_user['UserID'], "2026-10-10", "10:00", "Notes")
+    
+    # Cancel it
+    svc.cancel_appointment(appt['AppointmentID'])
+    
+    # Try booking again
+    appt2 = svc.book_appointment(p_user['UserID'], d_user['UserID'], "2026-10-10", "10:00", "Notes2")
+    assert appt2 is not None

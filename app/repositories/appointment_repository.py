@@ -49,3 +49,9 @@ class AppointmentRepository(BaseRepository):
             "PatientID = :pid",
             {":pid": patient_id}
         )
+    def release_slot_lock(self, appt_id):
+        appt = self.get_item(self.TABLE, {"AppointmentID": appt_id})
+        if appt and appt.get('DoctorID') and appt.get('ScheduledAt'):
+            lock_id = f"SLOT#{appt['DoctorID']}#{appt['ScheduledAt']}"
+            table = self._get_table(self.TABLE)
+            self._execute_with_retry(table.delete_item, Key={"AppointmentID": lock_id})
