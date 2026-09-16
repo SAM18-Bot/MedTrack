@@ -1,0 +1,14 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-2">{{ doctor.Name }}</h1>
+<p class="text-muted">{{ doctor.SpecializationID }} | {{ doctor.ExperienceYears }} Years Experience</p>
+<p>{{ doctor.Bio }}</p>
+<hr>
+<h3>Book Appointment</h3>
+<form method="POST" class="w-50">
+    {{ form.hidden_tag() }}
+    {{ form.date.label }} {{ form.date(class="form-control mb-2", placeholder="YYYY-MM-DD") }}
+    {{ form.time.label }} {{ form.time(class="form-control mb-2", placeholder="HH:MM") }}
+    {{ form.notes.label }} {{ form.notes(class="form-control mb-2") }}
+    {{ form.submit(class="btn btn-success mt-2") }}
+</form>
+{% endblock %}

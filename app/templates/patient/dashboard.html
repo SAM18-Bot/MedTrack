@@ -1,0 +1,14 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">Patient Dashboard</h1>
+<div class="row">
+    <div class="col-md-4"><div class="card p-3 shadow-sm mb-3 border-0 bg-primary text-white"><h5>Upcoming Appointments</h5><h2>{{ upcoming|length }}</h2></div></div>
+    <div class="col-md-4"><div class="card p-3 shadow-sm mb-3 border-0 bg-info text-white"><h5>Recent Prescriptions</h5><h2>0</h2></div></div>
+    <div class="col-md-4"><div class="card p-3 shadow-sm mb-3 border-0 bg-secondary text-white"><h5>Unread Notifications</h5><h2>0</h2></div></div>
+</div>
+<div class="mt-4">
+    <h3>Quick Actions</h3>
+    <a href="{{ url_for('patient.doctors') }}" class="btn btn-outline-primary">Find a Doctor</a>
+    <a href="{{ url_for('patient.vitals') }}" class="btn btn-outline-primary">Log Vitals</a>
+    <a href="{{ url_for('patient.profile') }}" class="btn btn-outline-primary">My Profile</a>
+</div>
+{% endblock %}

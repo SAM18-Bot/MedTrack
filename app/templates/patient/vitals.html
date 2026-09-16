@@ -1,0 +1,35 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">Vitals Tracker</h1>
+<div class="row">
+    <div class="col-md-4">
+        <form method="POST" class="card p-3 shadow-sm border-0">
+            {{ form.hidden_tag() }}
+            {{ form.blood_pressure.label }} {{ form.blood_pressure(class="form-control mb-2") }}
+            {{ form.sugar_level.label }} {{ form.sugar_level(class="form-control mb-2") }}
+            {{ form.weight.label }} {{ form.weight(class="form-control mb-2") }}
+            {{ form.heart_rate.label }} {{ form.heart_rate(class="form-control mb-3") }}
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </div>
+    <div class="col-md-8">
+        <div class="card p-3 shadow-sm border-0">
+            <canvas id="vitalsChart"></canvas>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('vitalsChart');
+    const vitalsData = {{ vitals_json | safe }};
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: vitalsData.map(v => new Date(v.RecordedAt).toLocaleDateString()),
+            datasets: [
+                {label: 'Heart Rate', data: vitalsData.map(v => v.HeartRate), borderColor: 'red'},
+                {label: 'Weight', data: vitalsData.map(v => v.Weight), borderColor: 'blue'}
+            ]
+        }
+    });
+</script>
+{% endblock %}

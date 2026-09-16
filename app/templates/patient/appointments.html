@@ -1,0 +1,21 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">My Appointments</h1>
+<table class="table table-striped">
+    <tr><th>Doctor ID</th><th>Date/Time</th><th>Status</th><th>Actions</th></tr>
+    {% for appt in appointments %}
+    <tr>
+        <td>{{ appt.DoctorID }}</td>
+        <td>{{ appt.ScheduledAt }}</td>
+        <td><span class="badge bg-primary">{{ appt.Status }}</span></td>
+        <td>
+            {% if appt.Status == 'Pending' or appt.Status == 'Confirmed' %}
+            <form method="POST" action="{{ url_for('patient.cancel_appointment', id=appt.AppointmentID) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

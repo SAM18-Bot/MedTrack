@@ -1,0 +1,20 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">Search Doctors</h1>
+<form method="POST" class="mb-4 d-flex gap-2 align-items-end">
+    {{ form.hidden_tag() }}
+    <div>{{ form.specialization.label }} {{ form.specialization(class="form-control") }}</div>
+    <div>{{ form.city.label }} {{ form.city(class="form-control") }}</div>
+    <div>{{ form.max_fee.label }} {{ form.max_fee(class="form-control") }}</div>
+    <div>{{ form.submit(class="btn btn-primary") }}</div>
+</form>
+<div class="list-group">
+    {% for doc in doctors %}
+    <a href="{{ url_for('patient.doctor_detail', id=doc.DoctorID) }}" class="list-group-item list-group-item-action">
+        <h5 class="mb-1">{{ doc.Name }} - {{ doc.SpecializationID }}</h5>
+        <p class="mb-1">Fee: ${{ doc.ConsultationFee }} | Experience: {{ doc.ExperienceYears }} years</p>
+    </a>
+    {% else %}
+    <p>No doctors found.</p>
+    {% endendfor %}
+</div>
+{% endblock %}

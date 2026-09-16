@@ -1,0 +1,18 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">My Profile</h1>
+<form method="POST" class="w-75">
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="col-md-6 mb-3">{{ form.name.label }} {{ form.name(class="form-control") }}</div>
+        <div class="col-md-6 mb-3">{{ form.dob.label }} {{ form.dob(class="form-control") }}</div>
+        <div class="col-md-6 mb-3">{{ form.gender.label }} {{ form.gender(class="form-control") }}</div>
+        <div class="col-md-6 mb-3">{{ form.blood_group.label }} {{ form.blood_group(class="form-control") }}</div>
+        <div class="col-md-6 mb-3">{{ form.height.label }} {{ form.height(class="form-control") }}</div>
+        <div class="col-md-6 mb-3">{{ form.weight.label }} {{ form.weight(class="form-control") }}</div>
+        <div class="col-md-12 mb-3">{{ form.address.label }} {{ form.address(class="form-control") }}</div>
+        <div class="col-md-12 mb-3">{{ form.allergies.label }} {{ form.allergies(class="form-control") }}</div>
+        <div class="col-md-12 mb-3">{{ form.chronic_conditions.label }} {{ form.chronic_conditions(class="form-control") }}</div>
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}
