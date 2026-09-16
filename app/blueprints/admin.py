@@ -79,3 +79,7 @@ def audit():
     svc = AdminService()
     logs = svc.get_audit_logs()
     return render_template('admin/audit_logs.html', logs=logs)
+
+@admin_bp.route('/content', methods=['GET', 'POST'])
+def content():
+    return "Content Editor"

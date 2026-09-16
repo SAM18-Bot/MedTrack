@@ -8,7 +8,7 @@
                 "logs:CreateLogStream",
                 "logs:PutLogEvents"
             ],
-            "Resource": "arn:aws:logs:*:*:*"
+            "Resource": "arn:aws:logs:us-east-1:111122223333:log-group:/aws/lambda/MedTrack-Reminder:*"
         },
         {
             "Effect": "Allow",
@@ -17,7 +17,7 @@
                 "dynamodb:Query"
             ],
             "Resource": [
-                "arn:aws:dynamodb:*:*:table/MedTrack-Appointments"
+                "arn:aws:dynamodb:us-east-1:111122223333:table/MedTrack-Appointments"
             ]
         },
         {
@@ -26,7 +26,7 @@
                 "sns:Publish"
             ],
             "Resource": [
-                "arn:aws:sns:*:*:MedTrack-Alerts"
+                "arn:aws:sns:us-east-1:111122223333:MedTrack-Alerts"
             ]
         }
     ]

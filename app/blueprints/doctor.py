@@ -98,3 +98,7 @@ def reviews(): return render_template('doctor/reviews.html')
 
 @doctor_bp.route('/revenue')
 def revenue(): return render_template('doctor/revenue.html')
+
+@doctor_bp.route('/patients/<id>')
+def patient_detail(id):
+    return f"Patient Detail {id}"

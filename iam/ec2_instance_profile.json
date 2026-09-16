@@ -13,7 +13,7 @@
                 "dynamodb:TransactWriteItems"
             ],
             "Resource": [
-                "arn:aws:dynamodb:*:*:table/MedTrack-*"
+                "arn:aws:dynamodb:us-east-1:111122223333:table/MedTrack-Users"
             ]
         },
         {
@@ -23,7 +23,7 @@
                 "s3:GetObject"
             ],
             "Resource": [
-                "arn:aws:s3:::medtrack-documents-*/*"
+                "arn:aws:s3:::medtrack-documents-111122223333/uploads/*"
             ]
         },
         {
@@ -32,7 +32,7 @@
                 "sns:Publish"
             ],
             "Resource": [
-                "arn:aws:sns:*:*:MedTrack-*"
+                "arn:aws:sns:us-east-1:111122223333:MedTrack-Alerts"
             ]
         },
         {
@@ -42,7 +42,7 @@
                 "ssm:GetParametersByPath"
             ],
             "Resource": [
-                "arn:aws:ssm:*:*:parameter/medtrack/*"
+                "arn:aws:ssm:us-east-1:111122223333:parameter/medtrack/prod/SECRET_KEY"
             ]
         }
     ]

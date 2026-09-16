@@ -37,10 +37,3 @@ def role_required(*roles):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
-
-def owns_record(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        # Ownership check logic to be implemented fully in future phase
-        return f(*args, **kwargs)
-    return decorated_function

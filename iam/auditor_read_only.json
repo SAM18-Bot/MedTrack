@@ -9,7 +9,7 @@
                 "dynamodb:GetItem"
             ],
             "Resource": [
-                "arn:aws:dynamodb:*:*:table/MedTrack-AuditLogs"
+                "arn:aws:dynamodb:us-east-1:111122223333:table/MedTrack-AuditLogs"
             ]
         }
     ]
