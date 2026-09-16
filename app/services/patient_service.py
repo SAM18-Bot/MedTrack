@@ -4,6 +4,9 @@ from app.repositories.patient_repository import PatientRepository
 from app.repositories.doctor_repository import DoctorRepository
 from app.repositories.appointment_repository import AppointmentRepository
 from app.repositories.vitals_repository import VitalsRepository
+from app.repositories.medical_document_repository import MedicalDocumentRepository
+from app.repositories.prescription_repository import PrescriptionRepository
+from app.services.storage_service import StorageService
 from app.services.notification_service import NotificationService
 from app.utils import get_utc_now
 
@@ -13,6 +16,9 @@ class PatientService:
         self.doctor_repo = DoctorRepository()
         self.appointment_repo = AppointmentRepository()
         self.vitals_repo = VitalsRepository()
+        self.doc_upload_repo = MedicalDocumentRepository()
+        self.rx_repo = PrescriptionRepository()
+        self.storage = StorageService()
         self.notification = NotificationService()
 
     def get_profile(self, patient_id):
@@ -101,3 +107,34 @@ class PatientService:
 
     def get_vitals(self, patient_id):
         return self.vitals_repo.get_vitals(patient_id)
+
+    def get_prescriptions(self, patient_id):
+        return self.rx_repo.query_index(self.rx_repo.TABLE, 'patient-index', 'PatientID = :pid', {':pid': patient_id})
+
+    def get_prescription_by_id(self, rx_id):
+        return self.rx_repo.get_item(self.rx_repo.TABLE, {'PrescriptionID': rx_id})
+
+    def get_documents(self, patient_id):
+        return self.doc_upload_repo.get_patient_documents(patient_id)
+
+    def upload_document(self, patient_id, title, file_obj, filename):
+        doc_id = str(uuid.uuid4())
+        ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'bin'
+        s3_key = f"documents/{patient_id}/{doc_id}.{ext}"
+        
+        # Upload to S3
+        self.storage.upload_file(file_obj, s3_key)
+        
+        # Save metadata
+        item = {
+            "DocumentID": doc_id,
+            "PatientID": patient_id,
+            "Title": title,
+            "S3Key": s3_key,
+            "UploadedAt": get_utc_now(),
+            "IsDeleted": False
+        }
+        self.doc_upload_repo.put_item(self.doc_upload_repo.TABLE, item)
+        
+    def get_document_url(self, s3_key):
+        return self.storage.get_presigned_url(s3_key)

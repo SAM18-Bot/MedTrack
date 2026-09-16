@@ -1,1 +1,34 @@
-{% extends 'base.html' %}{% block content %}<h1>Documents</h1><p>Coming soon (Phase 8).</p>{% endblock %}
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">Medical Documents</h1>
+<div class="row">
+    <div class="col-md-4">
+        <form method="POST" enctype="multipart/form-data" class="card p-3 shadow-sm border-0">
+            {{ form.hidden_tag() }}
+            {{ form.title.label }} {{ form.title(class="form-control mb-2") }}
+            {{ form.document.label }} {{ form.document(class="form-control mb-3") }}
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </div>
+    <div class="col-md-8">
+        <table class="table table-striped">
+            <tr><th>Title</th><th>Uploaded At</th><th>Action</th></tr>
+            {% for doc in documents %}
+            <tr>
+                <td>{{ doc.Title }}</td><td>{{ doc.UploadedAt }}</td>
+                <td><a href="{{ url_for('patient.download_document', s3_key=doc.S3Key) }}" target="_blank" class="btn btn-sm btn-info">View / Download</a></td>
+            </tr>
+            {% else %}<tr><td colspan="3">No documents uploaded.</td></tr>{% endfor %}
+        </table>
+    </div>
+</div>
+<h2 class="mt-5 mb-4">Prescriptions</h2>
+<table class="table table-striped">
+    <tr><th>Date</th><th>Medicines</th><th>Action</th></tr>
+    {% for rx in prescriptions %}
+    <tr>
+        <td>{{ rx.CreatedAt }}</td><td>{{ rx.Medicines[:30] }}...</td>
+        <td><a href="{{ url_for('patient.download_prescription', rx_id=rx.PrescriptionID) }}" class="btn btn-sm btn-success">Generate PDF</a></td>
+    </tr>
+    {% else %}<tr><td colspan="3">No prescriptions found.</td></tr>{% endfor %}
+</table>
+{% endblock %}

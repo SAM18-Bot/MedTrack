@@ -35,3 +35,9 @@ class VitalsForm(FlaskForm):
     weight = FloatField('Weight (kg)', validators=[DataRequired()])
     heart_rate = IntegerField('Heart Rate (bpm)', validators=[DataRequired()])
     submit = SubmitField('Log Vitals')
+
+from flask_wtf.file import FileField, FileAllowed, FileRequired
+class DocumentUploadForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    document = FileField('Document', validators=[FileRequired(), FileAllowed(['pdf', 'png', 'jpg'], 'PDF or Images only!')])
+    submit = SubmitField('Upload')

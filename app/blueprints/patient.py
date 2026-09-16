@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from app.utils import login_required, role_required, DecimalEncoder
-from app.forms.patient_forms import ProfileForm, DoctorSearchForm, BookingForm, VitalsForm
+from app.forms.patient_forms import ProfileForm, DoctorSearchForm, BookingForm, VitalsForm, DocumentUploadForm
 from app.services.patient_service import PatientService
 
 patient_bp = Blueprint('patient', __name__)
@@ -115,4 +115,45 @@ def records(): return render_template('patient/records.html')
 def invoices(): return render_template('patient/invoices.html')
 
 @patient_bp.route('/documents', methods=['GET', 'POST'])
-def documents(): return render_template('patient/documents.html')
+def documents():
+    from app.services.patient_service import PatientService
+    svc = PatientService()
+    form = DocumentUploadForm()
+    
+    if form.validate_on_submit():
+        f = form.document.data
+        svc.upload_document(session['user_id'], form.title.data, f, f.filename)
+        flash('Document uploaded to secure S3 storage.', 'success')
+        return redirect(url_for('patient.documents'))
+        
+    docs = svc.get_documents(session['user_id'])
+    rxs = svc.get_prescriptions(session['user_id'])
+    return render_template('patient/documents.html', form=form, documents=docs, prescriptions=rxs)
+
+@patient_bp.route('/documents/download')
+def download_document():
+    from app.services.patient_service import PatientService
+    svc = PatientService()
+    s3_key = request.args.get('s3_key')
+    url = svc.get_document_url(s3_key)
+    if url:
+        return redirect(url)
+    flash("Could not generate secure link.", "danger")
+    return redirect(url_for('patient.documents'))
+
+@patient_bp.route('/prescriptions/<rx_id>/download')
+def download_prescription(rx_id):
+    from app.services.patient_service import PatientService
+    from app.services.pdf_service import PdfService
+    svc = PatientService()
+    pdf_svc = PdfService()
+    
+    rx = svc.get_prescription_by_id(rx_id)
+    if not rx or rx['PatientID'] != session['user_id']:
+        return "Unauthorized", 403
+        
+    # Generate PDF, upload to S3, get url
+    s3_key = pdf_svc.generate_and_upload_prescription(rx_id, "Doctor", "Patient", rx.get('Medicines', ''), rx.get('CreatedAt', ''))
+    url = svc.get_document_url(s3_key)
+    return redirect(url)
+

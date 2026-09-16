@@ -16,3 +16,4 @@ Production-Grade Cloud Healthcare Management System (AWS Cloud Practitioner Caps
 - **Phase 5 (Patient Portal):** Dashboard, doctor search, double-book protected appointment scheduling via DynamoDB conditional transactions, and Chart.js vitals tracker.
 - **Phase 6 (Doctor Portal):** Availability manager, appointment queue, and split-screen consultation interface for diagnostics/prescriptions.
 - **Phase 7 (Admin Portal):** Doctor verifications, user suspension, specialization CRUD, support desk routing, and full system audit logs.
+- **Phase 8 (AWS Service Integrations):** Medical documents S3 bucket uploads with presigned URLs, ReportLab dynamic PDF generation, SNS reminders, and EventBridge cron lambda definitions.
