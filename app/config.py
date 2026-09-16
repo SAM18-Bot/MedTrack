@@ -5,3 +5,4 @@ class Config:
 class TestConfig(Config):
     TESTING = True
     WTF_CSRF_ENABLED = False
+    RATELIMIT_ENABLED = False
