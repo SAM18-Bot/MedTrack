@@ -5,6 +5,10 @@ from app.extensions import csrf, limiter
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    
+    if not app.config.get('SECRET_KEY') and not app.config.get('TESTING'):
+        raise ValueError("No SECRET_KEY set for Flask application")
+        
     csrf.init_app(app)
     limiter.init_app(app)
 
