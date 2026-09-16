@@ -37,3 +37,19 @@ def role_required(*roles):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+from flask import abort, session
+from functools import wraps
+
+def owns_record(fetch_fn, owner_field='PatientID', id_kwarg='id'):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            record_id = kwargs.get(id_kwarg)
+            if not record_id:
+                abort(400, "Missing record ID")
+            record = fetch_fn(record_id)
+            if not record or record.get(owner_field) != session.get('user_id'):
+                abort(403)
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
