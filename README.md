@@ -60,3 +60,4 @@ pytest tests/
 ```
 - **Phase 10 (IAM & Hardening):** Strict least-privilege AWS IAM policies, Systems Manager Parameter Store setups, and Rate Limiting.
 - **Phase 11 (Testing):** Robust Concurrency transaction testing in DynamoDB and RBAC route enforcement verifications.
+- **Phase 12 (Deployment & Documentation):** EC2 bootstrap automation, CloudWatch metric dashboards, Mermaid architecture diagrams, and formal Capstone demo scripts.
