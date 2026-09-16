@@ -14,3 +14,4 @@ Production-Grade Cloud Healthcare Management System (AWS Cloud Practitioner Caps
 - **Phase 3 (Auth):** Implemented registration, login, lockouts, OTP, audit logging, and role-based routing.
 - **Phase 4 (Public & Legal):** Marketing pages, substantive legal copies (DPDP/HIPAA), Support ticketing integration with SNS.
 - **Phase 5 (Patient Portal):** Dashboard, doctor search, double-book protected appointment scheduling via DynamoDB conditional transactions, and Chart.js vitals tracker.
+- **Phase 6 (Doctor Portal):** Availability manager, appointment queue, and split-screen consultation interface for diagnostics/prescriptions.

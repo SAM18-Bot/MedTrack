@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">Doctor Dashboard</h1>
+{% if doctor and doctor.Status == 'Pending' %}
+<div class="alert alert-warning">Your account is pending admin approval. You cannot receive bookings yet.</div>
+{% endif %}
+<div class="row">
+    <div class="col-md-4"><div class="card p-3 bg-primary text-white mb-3 border-0"><h5>Today's Queue</h5><h2>{{ queue|length }}</h2></div></div>
+    <div class="col-md-4"><div class="card p-3 bg-success text-white mb-3 border-0"><h5>Daily Revenue</h5><h2>${{ rev }}</h2></div></div>
+</div>
+<div class="mt-4">
+    <h3>Quick Links</h3>
+    <a href="{{ url_for('doctor.queue') }}" class="btn btn-outline-primary">Manage Queue</a>
+    <a href="{{ url_for('doctor.availability') }}" class="btn btn-outline-primary">Set Availability</a>
+    <a href="{{ url_for('doctor.profile') }}" class="btn btn-outline-primary">My Profile</a>
+</div>
+{% endblock %}

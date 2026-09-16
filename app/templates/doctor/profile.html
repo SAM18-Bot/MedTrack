@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">My Professional Profile</h1>
+<form method="POST" class="w-75">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">{{ form.bio.label }} {{ form.bio(class="form-control") }}</div>
+    <div class="mb-3">{{ form.clinic_address.label }} {{ form.clinic_address(class="form-control") }}</div>
+    <div class="mb-3">{{ form.consultation_fee.label }} {{ form.consultation_fee(class="form-control") }}</div>
+    <div class="mb-3">{{ form.experience_years.label }} {{ form.experience_years(class="form-control") }}</div>
+    <div class="mb-3">{{ form.qualifications.label }} {{ form.qualifications(class="form-control") }}</div>
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}

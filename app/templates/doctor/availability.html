@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">Availability Manager</h1>
+<p>Select a date and working hours to automatically generate bookable slots.</p>
+<form method="POST" class="w-50 card p-4 shadow-sm border-0">
+    {{ form.hidden_tag() }}
+    {{ form.date.label }} {{ form.date(class="form-control mb-3", placeholder="YYYY-MM-DD") }}
+    {{ form.start_time.label }} {{ form.start_time(class="form-control mb-3", placeholder="09:00") }}
+    {{ form.end_time.label }} {{ form.end_time(class="form-control mb-3", placeholder="17:00") }}
+    {{ form.slot_duration.label }} {{ form.slot_duration(class="form-control mb-3") }}
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}

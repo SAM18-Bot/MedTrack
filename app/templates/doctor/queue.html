@@ -1,0 +1,30 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">Appointment Queue ({{ date }})</h1>
+<table class="table table-striped align-middle">
+    <tr><th>Time</th><th>Patient ID</th><th>Status</th><th>Notes</th><th>Actions</th></tr>
+    {% for q in queue|sort(attribute='ScheduledAt') %}
+    <tr>
+        <td>{{ q.ScheduledAt.split('T')[1][:5] }}</td>
+        <td>{{ q.PatientID }}</td>
+        <td><span class="badge bg-secondary">{{ q.Status }}</span></td>
+        <td>{{ q.Notes }}</td>
+        <td>
+            {% if q.Status == 'Pending' %}
+            <form method="POST" action="{{ url_for('doctor.update_status', id=q.AppointmentID) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="hidden" name="status" value="Confirmed"/>
+                <button class="btn btn-sm btn-success">Confirm</button>
+            </form>
+            {% elif q.Status == 'Confirmed' %}
+            <a href="{{ url_for('doctor.consultation', appt_id=q.AppointmentID) }}" class="btn btn-sm btn-primary">Start Consultation</a>
+            <form method="POST" action="{{ url_for('doctor.update_status', id=q.AppointmentID) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="hidden" name="status" value="No Show"/>
+                <button class="btn btn-sm btn-warning">No Show</button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
