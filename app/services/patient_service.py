@@ -32,15 +32,23 @@ class PatientService:
         
         expr = "SET "
         vals = {":updated": get_utc_now()}
-        expr_parts = ["UpdatedAt = :updated"]
+        names = {"#UpdatedAt": "UpdatedAt"}
+        expr_parts = ["#UpdatedAt = :updated"]
         
         for k, v in data.items():
             if v is not None and v != '':
-                expr_parts.append(f"{k} = :{k}")
+                expr_parts.append(f"#{k} = :{k}")
                 vals[f":{k}"] = v
+                names[f"#{k}"] = k
         
         expr += ", ".join(expr_parts)
-        self.patient_repo.update_item(self.patient_repo.TABLE, {"PatientID": patient_id}, expr, vals)
+        self.patient_repo.update_item(
+            self.patient_repo.TABLE, 
+            {"PatientID": patient_id}, 
+            expr, 
+            vals, 
+            expression_attribute_names=names
+        )
 
     def search_doctors(self, spec=None, city=None, max_fee=None):
         items = self.doctor_repo.query_index(
