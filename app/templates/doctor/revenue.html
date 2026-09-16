@@ -1,1 +1,31 @@
-{% extends 'base.html' %}{% block content %}<h1>Revenue Dashboard</h1><p>Coming soon (Phase 8).</p>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Revenue Dashboard{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Revenue Dashboard</h2>
+    <div class="table-responsive mt-3">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Invoice ID</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inv in invoices %}
+                <tr>
+                    <td>{{ inv.InvoiceID }}</td>
+                    <td>{{ inv.CreatedAt }}</td>
+                    <td>${{ inv.Amount }}</td>
+                    <td><span class="badge bg-{% if inv.Status == 'Paid' %}success{% else %}warning{% endif %}">{{ inv.Status }}</span></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" class="text-center">No invoices found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

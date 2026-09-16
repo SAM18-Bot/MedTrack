@@ -1,1 +1,20 @@
-{% extends 'base.html' %}{% block content %}<h1>My Reviews</h1><p>Coming soon (Phase 8).</p>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}My Reviews{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>My Reviews</h2>
+    <div class="list-group mt-3">
+        {% for review in reviews %}
+        <div class="list-group-item flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Rating: {{ review.Rating }}/5</h5>
+                <small>{{ review.CreatedAt }}</small>
+            </div>
+            <p class="mb-1">{{ review.Comment }}</p>
+        </div>
+        {% else %}
+        <p>No reviews found.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

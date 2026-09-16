@@ -1,1 +1,29 @@
-{% extends 'base.html' %}{% block content %}<h1>Medical Records</h1><p>Coming soon (Phase 8).</p>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Medical Records{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Medical Records</h2>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Diagnosis</th>
+                    <th>Symptoms</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                <tr>
+                    <td>{{ report.CreatedAt }}</td>
+                    <td>{{ report.Diagnosis }}</td>
+                    <td>{{ report.Symptoms }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="3" class="text-center">No records found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -150,3 +150,8 @@ class PatientService:
         
     def get_document_url(self, s3_key):
         return self.storage.get_presigned_url(s3_key)
+    def get_diagnosis_reports(self, patient_id):
+        return __import__('app.repositories.diagnosis_report_repository', fromlist=['DiagnosisReportRepository']).DiagnosisReportRepository().get_patient_reports(patient_id)
+
+    def get_invoices(self, patient_id):
+        return __import__('app.repositories.invoice_repository', fromlist=['InvoiceRepository']).InvoiceRepository().get_patient_invoices(patient_id)

@@ -105,3 +105,8 @@ class DoctorService:
             })
         # Complete Appt
         self.update_appointment_status(appt_id, "Completed")
+    def get_reviews(self, doctor_id):
+        return __import__('app.repositories.review_repository', fromlist=['ReviewRepository']).ReviewRepository().get_doctor_reviews(doctor_id)
+
+    def get_invoices(self, doctor_id):
+        return __import__('app.repositories.invoice_repository', fromlist=['InvoiceRepository']).InvoiceRepository().get_doctor_invoices(doctor_id)

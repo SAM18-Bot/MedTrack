@@ -110,10 +110,16 @@ def vitals():
     return render_template('patient/vitals.html', form=form, vitals=v_data, vitals_json=v_json)
 
 @patient_bp.route('/records')
-def records(): return render_template('patient/records.html')
+def records():
+    svc = PatientService()
+    reports = svc.get_diagnosis_reports(session['user_id'])
+    return render_template('patient/records.html', reports=reports)
 
 @patient_bp.route('/invoices')
-def invoices(): return render_template('patient/invoices.html')
+def invoices():
+    svc = PatientService()
+    invs = svc.get_invoices(session['user_id'])
+    return render_template('patient/invoices.html', invoices=invs)
 
 @patient_bp.route('/documents', methods=['GET', 'POST'])
 def documents():

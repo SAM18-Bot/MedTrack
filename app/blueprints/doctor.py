@@ -98,10 +98,16 @@ def consultation(appt_id):
     return render_template('doctor/consultation.html', form=form, appt=appt)
 
 @doctor_bp.route('/reviews')
-def reviews(): return render_template('doctor/reviews.html')
+def reviews():
+    svc = DoctorService()
+    revs = svc.get_reviews(session['user_id'])
+    return render_template('doctor/reviews.html', reviews=revs)
 
 @doctor_bp.route('/revenue')
-def revenue(): return render_template('doctor/revenue.html')
+def revenue():
+    svc = DoctorService()
+    invs = svc.get_invoices(session['user_id'])
+    return render_template('doctor/revenue.html', invoices=invs)
 
 @doctor_bp.route('/patients/<id>')
 @owns_record(lambda id: DoctorService().get_appointment(id), owner_field='DoctorID', id_kwarg='id')
