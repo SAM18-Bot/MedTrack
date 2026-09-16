@@ -1,4 +1,6 @@
-# MedTrack - AWS Cloud Practitioner Capstone
+import os
+
+readme = """# MedTrack - AWS Cloud Practitioner Capstone
 
 ![MedTrack Hero](https://via.placeholder.com/1200x400.png?text=MedTrack+-+Cloud+Healthcare+System)
 
@@ -58,3 +60,69 @@ The project leverages `pytest` and `moto` for comprehensive unit and integration
 ```bash
 pytest tests/
 ```
+"""
+
+os.makedirs('deploy', exist_ok=True)
+
+with open('README.md', 'w', encoding='utf-8') as f:
+    f.write(readme)
+    
+gunicorn_conf = """bind = "127.0.0.1:8000"
+workers = 3
+threads = 2
+timeout = 120
+"""
+with open('gunicorn_config.py', 'w') as f:
+    f.write(gunicorn_conf)
+
+nginx_conf = """server {
+    listen 80;
+    server_name _;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /static {
+        alias /opt/medtrack/app/static;
+    }
+}
+"""
+with open('deploy/nginx.conf', 'w') as f:
+    f.write(nginx_conf)
+
+systemd_conf = """[Unit]
+Description=Gunicorn instance to serve MedTrack
+After=network.target
+
+[Service]
+User=ec2-user
+Group=www-data
+WorkingDirectory=/opt/medtrack
+Environment="PATH=/opt/medtrack/venv/bin"
+EnvironmentFile=/opt/medtrack/.env
+ExecStart=/opt/medtrack/venv/bin/gunicorn --config gunicorn_config.py run:app
+
+[Install]
+WantedBy=multi-user.target
+"""
+with open('deploy/medtrack.service', 'w') as f:
+    f.write(systemd_conf)
+
+errors = {
+    "400": ("Bad Request", "The server could not understand the request due to invalid syntax."),
+    "401": ("Unauthorized", "You must be authenticated to access this resource."),
+    "403": ("Forbidden", "You do not have permission to view this directory or page using the credentials that you supplied."),
+    "404": ("Not Found", "The medical record or page you are looking for does not exist."),
+    "429": ("Too Many Requests", "You have exceeded your rate limit. Please wait a moment and try again."),
+    "500": ("Internal Server Error", "The server encountered an internal error or misconfiguration and was unable to complete your request.")
+}
+os.makedirs('app/templates/errors', exist_ok=True)
+for code, (title, desc) in errors.items():
+    content = f"{{% extends 'base.html' %}}\n{{% block content %}}\n<div class='text-center py-5'>\n<h1 class='display-1 text-primary'>{code}</h1>\n<h2>{title}</h2>\n<p class='lead'>{desc}</p>\n<a href='/' class='btn btn-primary mt-3'>Return to Home</a>\n</div>\n{{% endblock %}}"
+    with open(f"app/templates/errors/{code}.html", 'w') as f:
+        f.write(content)

@@ -1,0 +1,14 @@
+[Unit]
+Description=Gunicorn instance to serve MedTrack
+After=network.target
+
+[Service]
+User=ec2-user
+Group=www-data
+WorkingDirectory=/opt/medtrack
+Environment="PATH=/opt/medtrack/venv/bin"
+EnvironmentFile=/opt/medtrack/.env
+ExecStart=/opt/medtrack/venv/bin/gunicorn --config gunicorn_config.py run:app
+
+[Install]
+WantedBy=multi-user.target
