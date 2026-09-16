@@ -58,3 +58,4 @@ The project leverages `pytest` and `moto` for comprehensive unit and integration
 ```bash
 pytest tests/
 ```
+- **Phase 10 (IAM & Hardening):** Strict least-privilege AWS IAM policies, Systems Manager Parameter Store setups, and Rate Limiting.
