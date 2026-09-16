@@ -1,0 +1,3 @@
+:root { --med-primary: #0ea5e9; --med-secondary: #0284c7; --med-bg: #f8fafc; --med-text: #334155; }
+body { background-color: var(--med-bg); color: var(--med-text); font-family: 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
+.navbar-brand { color: var(--med-primary) !important; font-size: 1.5rem; font-weight: bold; }

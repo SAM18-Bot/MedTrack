@@ -1,0 +1,7 @@
+- Never hardcode secrets, AWS keys, passwords, or table names. Use os.environ with a documented .env.example.
+- Passwords hashed with werkzeug.security (pbkdf2:sha256). Never store plaintext.
+- Every POST form uses Flask-WTF CSRF protection.
+- Every route that touches patient data must check session role AND ownership. A doctor may only read records for patients who have an appointment with them. A patient may only read their own records. Write a @role_required and @owns_record decorator and use them everywhere.
+- Sanitize and validate all input server-side, even if validated client-side.
+- IAM policies must be least-privilege with explicit resource ARNs. Never use "Action": "*" or "Resource": "*".
+- Log every sensitive action (login, record view, prescription write, data export) to an AuditLogs table.

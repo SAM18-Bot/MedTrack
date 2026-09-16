@@ -1,0 +1,6 @@
+- Never dump logic into app.py. Use a Flask application factory (create_app) with blueprints: auth, patient, doctor, admin, public, support, api.
+- All DynamoDB access goes through a repository layer in app/repositories/. No blueprint file may import boto3 directly.
+- All business logic goes in app/services/. Routes only validate input, call a service, and render or return.
+- Every module gets type hints and docstrings.
+- Shared config in app/config.py, read from environment variables only.
+- Templates use Jinja2 inheritance from a single base.html. No duplicated nav/footer markup.

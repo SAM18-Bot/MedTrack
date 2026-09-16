@@ -1,0 +1,6 @@
+- Wrap every boto3 call in try/except botocore.exceptions.ClientError. Log the error code, return a user-safe message, never leak stack traces to the browser.
+- Implement exponential backoff retry for ProvisionedThroughputExceededException and ThrottlingException.
+- If SNS publish fails, the primary action (e.g. booking) must still succeed. Queue the notification as failed and log it. Notifications are never allowed to break the transaction.
+- Custom error pages for 400, 401, 403, 404, 429, 500 that match the site design.
+- Flash messages for every user-facing success/failure. No silent failures.
+- Validate that a DynamoDB item exists before using it. Handle empty Items lists explicitly.

@@ -1,0 +1,4 @@
+- Always produce complete, runnable files. Never output partial files, "..." placeholders, or TODO stubs in delivered code.
+- After each phase, run the app and verify it actually starts and the new routes respond before declaring the phase done.
+- Update README.md at the end of every phase.
+- Commit to git after each verified phase with a descriptive message.
