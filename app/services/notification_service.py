@@ -21,3 +21,14 @@ class NotificationService:
         except ClientError as e:
             logger.error(f"Failed to send OTP via SNS: {e}")
             return False
+
+    def notify_admin(self, subject: str, message: str) -> bool:
+        if not self.topic_arn:
+            logger.info(f"Simulating Admin Alert - {subject}: {message}")
+            return True
+        try:
+            self.sns.publish(TopicArn=self.topic_arn, Subject=subject, Message=message)
+            return True
+        except ClientError as e:
+            logger.error(f"Failed to notify admin via SNS: {e}")
+            return False

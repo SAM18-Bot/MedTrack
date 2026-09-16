@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">Raise Support Ticket</h1>
+<form method="POST" class="w-50">
+    {{ form.hidden_tag() }}
+    {{ form.category.label(class="form-label") }} {{ form.category(class="form-select mb-3") }}
+    {{ form.priority.label(class="form-label") }} {{ form.priority(class="form-select mb-3") }}
+    {{ form.subject.label(class="form-label") }} {{ form.subject(class="form-control mb-3") }}
+    {{ form.description.label(class="form-label") }} {{ form.description(class="form-control mb-3") }}
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}

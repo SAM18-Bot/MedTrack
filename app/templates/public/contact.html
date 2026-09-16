@@ -1,0 +1,15 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4 text-primary">Contact Us</h1>
+<div class="row">
+    <div class="col-md-6">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.name.label(class="form-label") }} {{ form.name(class="form-control mb-3") }}
+            {{ form.email.label(class="form-label") }} {{ form.email(class="form-control mb-3") }}
+            {{ form.subject.label(class="form-label") }} {{ form.subject(class="form-control mb-3") }}
+            {{ form.message.label(class="form-label") }} {{ form.message(class="form-control mb-3") }}
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </div>
+</div>
+{% endblock %}

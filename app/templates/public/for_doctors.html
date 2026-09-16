@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4 text-primary">For Doctors</h1>
+<p class="lead">Join a rapidly growing network of verified medical professionals.</p>
+<p>Why MedTrack?</p>
+<ul>
+    <li>Automated scheduling and queue management.</li>
+    <li>Secure patient history access.</li>
+    <li>Automated billing and invoices.</li>
+</ul>
+<a href="{{ url_for('auth.register_doctor') }}" class="btn btn-primary">Apply Now</a>
+{% endblock %}

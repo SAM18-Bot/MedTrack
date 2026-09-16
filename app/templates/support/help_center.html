@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">Help Center</h1>
+<a href="{{ url_for('support.knowledge_base') }}" class="btn btn-outline-primary">Knowledge Base</a>
+<a href="{{ url_for('support.new_ticket') }}" class="btn btn-primary">Raise a Ticket</a>
+{% endblock %}

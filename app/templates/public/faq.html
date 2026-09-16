@@ -1,0 +1,28 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4 text-primary">Frequently Asked Questions</h1>
+<input type="text" id="faqSearch" onkeyup="searchFAQ()" placeholder="Search FAQs..." class="form-control mb-4">
+<div class="accordion" id="faqAccordion">
+    <div class="accordion-item">
+        <h2 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">How do I book an appointment?</button></h2>
+        <div id="collapseOne" class="accordion-collapse collapse show"><div class="accordion-body">Once logged in as a patient, navigate to 'Find Doctors' and select an available slot.</div></div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">Is my data secure?</button></h2>
+        <div id="collapseTwo" class="accordion-collapse collapse"><div class="accordion-body">Yes. We use AWS server-side encryption and strict IAM least-privilege roles to protect your medical records.</div></div>
+    </div>
+</div>
+<script>
+function searchFAQ() {
+    let filter = document.getElementById('faqSearch').value.toUpperCase();
+    let items = document.getElementsByClassName('accordion-item');
+    for (let i = 0; i < items.length; i++) {
+        let txtValue = items[i].textContent || items[i].innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            items[i].style.display = "";
+        } else {
+            items[i].style.display = "none";
+        }
+    }
+}
+</script>
+{% endblock %}
