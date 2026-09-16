@@ -110,3 +110,4 @@ class DoctorService:
 
     def get_invoices(self, doctor_id):
         return __import__('app.repositories.invoice_repository', fromlist=['InvoiceRepository']).InvoiceRepository().get_doctor_invoices(doctor_id)
+

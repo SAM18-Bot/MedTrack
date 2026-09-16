@@ -126,7 +126,7 @@ class AuthService:
             {':otp': generate_password_hash(otp, method='pbkdf2:sha256'), ':expiry': expiry, ':updated': get_utc_now()}
         )
         
-        phone = user.get('Phone', '+10000000000')
+        phone = user.get('Phone') or '+10000000000'
         self.notification_service.send_otp(phone, otp)
         self.audit_repo.log_action("FORGOT_PASSWORD", user['UserID'], "OTP Generated", status="Success")
 
@@ -156,3 +156,4 @@ class AuthService:
             {':pwd': pwd_hash, ':updated': get_utc_now()}
         )
         self.audit_repo.log_action("RESET_PASSWORD", user['UserID'], "Password reset", status="Success")
+

@@ -23,7 +23,8 @@ def contact():
     if form.validate_on_submit():
         svc = SupportService()
         msg = f"From: {form.name.data} ({form.email.data}) - {form.message.data}"
-        svc.raise_ticket('GUEST', 'Other', 'Medium', form.subject.data, msg, is_guest=True)
+        import uuid
+        svc.raise_ticket(f'GUEST#{uuid.uuid4()}', 'Other', 'Medium', form.subject.data, msg, is_guest=True)
         flash('Your message has been sent. We will get back to you shortly.', 'success')
         return redirect(url_for('public.contact'))
     return render_template('public/contact.html', form=form)
@@ -37,3 +38,4 @@ def legal(page):
 
 @public_bp.route('/sitemap')
 def sitemap(): return render_template('public/sitemap.html')
+

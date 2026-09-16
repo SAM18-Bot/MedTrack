@@ -99,3 +99,5 @@ def history():
     repo = LoginHistoryRepository()
     logs = repo.get_history(session['user_id'])
     return render_template('auth/login_history.html', logs=logs)
+
+

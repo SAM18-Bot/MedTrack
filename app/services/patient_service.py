@@ -155,3 +155,6 @@ class PatientService:
 
     def get_invoices(self, patient_id):
         return __import__('app.repositories.invoice_repository', fromlist=['InvoiceRepository']).InvoiceRepository().get_patient_invoices(patient_id)
+
+
+

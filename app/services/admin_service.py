@@ -99,3 +99,4 @@ class AdminService:
     def get_audit_logs(self):
         logs = self._scan(self.audit_repo)
         return sorted(logs, key=lambda x: x.get('Timestamp', ''), reverse=True)
+

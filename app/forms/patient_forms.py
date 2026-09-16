@@ -41,3 +41,4 @@ class DocumentUploadForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     document = FileField('Document', validators=[FileRequired(), FileAllowed(['pdf', 'png', 'jpg'], 'PDF or Images only!')])
     submit = SubmitField('Upload')
+
