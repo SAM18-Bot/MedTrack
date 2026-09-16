@@ -98,6 +98,13 @@ class AuthService:
         # Reset attempts on success. DynamoDB REMOVE is safe even if attribute doesn't exist
         expr = "SET FailedLoginAttempts = :attempts, UpdatedAt = :updated REMOVE LockoutUntil"
         updates = {':attempts': 0, ':updated': get_utc_now()}
+        
+        if user.get('Role') == 'Doctor':
+            doc = self.doctor_repo.get_item(self.doctor_repo.TABLE, {'DoctorID': user_id})
+            if not doc or doc.get('Status') != 'Approved':
+                self.audit_repo.log_action("LOGIN_ATTEMPT", user_id, "Pending approval", ip_address, user_agent, "Failed")
+                raise ValueError("Your account is pending admin approval. You cannot log in yet.")
+        
         self.user_repo.update_item(self.user_repo.TABLE, {'UserID': user_id}, expr, updates)
         
         self.login_history_repo.log_login(user_id, ip_address, user_agent, "Success")

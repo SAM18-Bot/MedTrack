@@ -28,3 +28,11 @@ def test_login_and_lockout(client, dynamodb_setup):
         
     res = client.post('/auth/login', data={'email': 'test@test.com', 'password': 'wrong', 'submit': True}, follow_redirects=True)
     assert b'Account locked due to too many failed attempts' in res.data
+
+def test_pending_doctor_login_blocked(dynamodb_setup):
+    auth = AuthService()
+    auth.register_doctor("Test Doc", "td@d.com", "123", "Cardiology", "12345", "Pass123!")
+    # Doctor is currently pending
+    import pytest
+    with pytest.raises(ValueError, match="Your account is pending admin approval"):
+        auth.authenticate("td@d.com", "Pass123!", "1.2.3.4", "UA")
