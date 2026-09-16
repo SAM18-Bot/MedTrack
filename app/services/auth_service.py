@@ -68,6 +68,8 @@ class AuthService:
             self.audit_repo.log_action("LOGIN_ATTEMPT", "UNKNOWN", f"Failed login for {email}", ip_address, user_agent, "Failed")
             raise ValueError("Invalid email or password.")
         
+        if user.get('IsDeleted'):
+            raise ValueError('This account has been suspended.')
         user_id = user['UserID']
         now = datetime.now(timezone.utc)
         

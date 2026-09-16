@@ -68,13 +68,14 @@ class BaseRepository:
         response = self._execute_with_retry(table.update_item, **kwargs)
         return response.get('Attributes')
 
-    def query_index(self, table_name, index_name, key_condition_expression, expression_attribute_values):
+    def query_index(self, table_name, index_name, key_condition_expression, expression_attribute_values, expression_attribute_names=None):
         table = self._get_table(table_name)
         response = self._execute_with_retry(
             table.query,
             IndexName=index_name,
             KeyConditionExpression=key_condition_expression,
-            ExpressionAttributeValues=expression_attribute_values
+            ExpressionAttributeValues=expression_attribute_values,
+            **( {'ExpressionAttributeNames': expression_attribute_names} if expression_attribute_names else {} )
         )
         items = response.get('Items', [])
         return [item for item in items if not item.get('IsDeleted')]

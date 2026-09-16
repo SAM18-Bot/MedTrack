@@ -1,0 +1,15 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">Manage Specializations</h1>
+<form method="POST" class="mb-5 card p-3 shadow-sm border-0 w-50">
+    {{ form.hidden_tag() }}
+    {{ form.name.label }} {{ form.name(class="form-control mb-2") }}
+    {{ form.description.label }} {{ form.description(class="form-control mb-3") }}
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+<table class="table table-striped">
+    <tr><th>Specialization</th><th>Description</th></tr>
+    {% for s in specializations %}
+    <tr><td>{{ s.Name }}</td><td>{{ s.Description }}</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

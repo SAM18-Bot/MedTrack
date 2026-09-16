@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">System Audit Logs</h1>
+<table class="table table-sm table-striped" style="font-size: 0.9rem;">
+    <tr><th>Timestamp</th><th>Action</th><th>User ID</th><th>Status</th><th>IP Address</th></tr>
+    {% for l in logs %}
+    <tr>
+        <td>{{ l.Timestamp }}</td><td>{{ l.ActionType }}</td>
+        <td>{{ l.UserID[:8] }}</td><td>{{ l.Status }}</td><td>{{ l.IPAddress }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">Support Desk</h1>
+<table class="table table-striped">
+    <tr><th>Subject</th><th>Priority</th><th>Status</th><th>Description</th><th>Actions</th></tr>
+    {% for t in tickets %}
+    <tr>
+        <td>{{ t.Subject }}</td><td>{{ t.Priority }}</td>
+        <td>
+            {% if t.Status == 'Resolved' %}<span class="badge bg-success">Resolved</span>
+            {% else %}<span class="badge bg-danger">Open</span>{% endif %}
+        </td>
+        <td>{{ t.Description[:50] }}...</td>
+        <td>
+            {% if t.Status != 'Resolved' %}
+            <form method="POST" action="{{ url_for('admin.resolve_ticket', id=t.TicketID) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button class="btn btn-sm btn-success">Resolve</button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

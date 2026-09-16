@@ -1,0 +1,23 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">User Management</h1>
+<table class="table table-striped align-middle">
+    <tr><th>User ID</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+    {% for u in users %}
+    <tr>
+        <td>{{ u.UserID[:8] }}...</td><td>{{ u.Email }}</td><td>{{ u.Role }}</td>
+        <td>
+            {% if u.IsDeleted %}<span class="badge bg-danger">Suspended</span>
+            {% else %}<span class="badge bg-success">Active</span>{% endif %}
+        </td>
+        <td>
+            {% if not u.IsDeleted and u.Role != 'Admin' %}
+            <form method="POST" action="{{ url_for('admin.ban_user', id=u.UserID) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button class="btn btn-sm btn-warning">Suspend</button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

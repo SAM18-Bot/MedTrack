@@ -1,0 +1,23 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">Pending Doctor Verifications</h1>
+<table class="table table-striped align-middle">
+    <tr><th>Doctor Name</th><th>Email</th><th>Specialization</th><th>Reg No.</th><th>Actions</th></tr>
+    {% for doc in doctors %}
+    <tr>
+        <td>{{ doc.Name }}</td><td>{{ doc.Email }}</td><td>{{ doc.SpecializationID }}</td><td>{{ doc.RegistrationNumber }}</td>
+        <td>
+            <form method="POST" action="{{ url_for('admin.approve_doctor', id=doc.DoctorID) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button class="btn btn-sm btn-success">Approve</button>
+            </form>
+            <form method="POST" action="{{ url_for('admin.reject_doctor', id=doc.DoctorID) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button class="btn btn-sm btn-danger">Reject</button>
+            </form>
+        </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">No pending doctors.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

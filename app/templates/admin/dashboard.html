@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% block content %}
+<h1 class="mb-4">Admin Dashboard</h1>
+<div class="row">
+    <div class="col-md-4"><div class="card p-3 bg-primary text-white border-0 mb-3"><h5>Total Users</h5><h2>{{ stats.total_users }}</h2></div></div>
+    <div class="col-md-4"><div class="card p-3 bg-warning text-dark border-0 mb-3"><h5>Pending Doctors</h5><h2>{{ stats.pending_doctors }}</h2></div></div>
+    <div class="col-md-4"><div class="card p-3 bg-danger text-white border-0 mb-3"><h5>Open Support Tickets</h5><h2>{{ stats.open_tickets }}</h2></div></div>
+</div>
+<div class="mt-4">
+    <h3>Quick Links</h3>
+    <a href="{{ url_for('admin.doctors_pending') }}" class="btn btn-outline-primary">Review Doctors</a>
+    <a href="{{ url_for('admin.users') }}" class="btn btn-outline-primary">Manage Users</a>
+    <a href="{{ url_for('admin.tickets') }}" class="btn btn-outline-primary">Support Desk</a>
+    <a href="{{ url_for('admin.specializations') }}" class="btn btn-outline-primary">Specializations</a>
+    <a href="{{ url_for('admin.audit') }}" class="btn btn-outline-primary">Audit Logs</a>
+</div>
+{% endblock %}
