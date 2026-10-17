@@ -12,7 +12,9 @@ class BaseRepository:
             'dynamodb',
             region_name=os.environ.get('AWS_DEFAULT_REGION', 'us-east-1')
         )
-        self.table_prefix = os.environ.get('DYNAMODB_PREFIX', 'MedTrack-')
+    @property
+    def table_prefix(self):
+        return os.environ.get('DYNAMODB_PREFIX', 'MedTrack-')
 
     def _get_table(self, table_name):
         return self.dynamodb.Table(f"{self.table_prefix}{table_name}")

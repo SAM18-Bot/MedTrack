@@ -2,6 +2,9 @@ import uuid
 import os
 import sys
 from werkzeug.security import generate_password_hash
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Adjust path so we can import app modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))

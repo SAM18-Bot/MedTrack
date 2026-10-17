@@ -4,11 +4,13 @@ After=network.target
 
 [Service]
 User=ec2-user
-Group=www-data
+Group=ec2-user
 WorkingDirectory=/opt/medtrack
 Environment="PATH=/opt/medtrack/venv/bin"
 EnvironmentFile=/opt/medtrack/.env
 ExecStart=/opt/medtrack/venv/bin/gunicorn --config gunicorn_config.py run:app
+Restart=always
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
