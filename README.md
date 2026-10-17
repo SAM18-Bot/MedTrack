@@ -113,11 +113,13 @@ You can create your primary table in the AWS Console to satisfy manual lab check
 
 ---
 
-### Step 4: Create S3 Bucket (For Medical Documents)
-1. Open the **Amazon S3** console and click **Create bucket**.
-2. **Bucket name:** Enter a unique name, e.g., `medtrack-documents-<your-account-id>`.
-3. **Region:** `us-east-1` (same as EC2).
-4. Leave other settings at their secure defaults and click **Create bucket**.
+### Step 4: S3 Bucket (Optional - Skip if no permission in Lab)
+> **Note for Student Labs:** If your learner lab policy does not permit creating S3 buckets (`AccessDenied`), **simply skip this step!** MedTrack includes an automated local disk storage fallback (`uploads/`) on EC2 so all medical document uploads and prescription PDFs will work 100% smoothly without an S3 bucket.
+> 
+> *If your lab permits S3:*
+> 1. Open **Amazon S3** → **Create bucket**.
+> 2. **Bucket name:** `medtrack-documents-<unique-id>`.
+> 3. Click **Create bucket**.
 
 ---
 

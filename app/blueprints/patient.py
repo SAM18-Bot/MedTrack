@@ -168,5 +168,20 @@ def download_prescription(rx_id):
     url = svc.get_document_url(s3_key)
     return redirect(url)
 
+@patient_bp.route('/files/<path:filename>')
+@login_required
+def serve_file(filename):
+    import os
+    from flask import send_from_directory, current_app, abort
+    upload_dir = os.path.abspath(os.path.join(current_app.root_path, '..', 'uploads'))
+    safe_path = os.path.abspath(os.path.join(upload_dir, filename))
+    if not safe_path.startswith(upload_dir):
+        abort(403)
+    if not os.path.exists(safe_path):
+        abort(404)
+    directory = os.path.dirname(safe_path)
+    base_file = os.path.basename(safe_path)
+    return send_from_directory(directory, base_file)
+
 
 

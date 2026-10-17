@@ -4,3 +4,4 @@ __pycache__/
 .env
 .pytest_cache/
 run_local_test.py
+uploads/
