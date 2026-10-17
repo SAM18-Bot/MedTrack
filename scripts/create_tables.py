@@ -220,18 +220,41 @@ def create_tables():
         }
     ]
 
+    created_tables = []
     for table in tables_def:
         table['BillingMode'] = 'PAY_PER_REQUEST'
         try:
             logger.info(f"Creating table {table['TableName']}...")
             dynamodb.create_table(**table)
             logger.info(f"Successfully requested creation of {table['TableName']}")
+            created_tables.append(table['TableName'])
         except ClientError as e:
             if e.response['Error']['Code'] == 'ResourceInUseException':
                 logger.info(f"Table {table['TableName']} already exists.")
+                try:
+                    desc = dynamodb.describe_table(TableName=table['TableName'])['Table']
+                    existing_indexes = {gsi['IndexName'] for gsi in desc.get('GlobalSecondaryIndexes', [])}
+                    required_indexes = {gsi['IndexName'] for gsi in table.get('GlobalSecondaryIndexes', [])}
+                    missing = required_indexes - existing_indexes
+                    if missing:
+                        logger.warning(
+                            f"WARNING: Table {table['TableName']} is missing required index(es): {missing}. "
+                            f"Please delete {table['TableName']} and re-run this script to create it with all required indexes."
+                        )
+                except Exception:
+                    pass
             else:
                 logger.error(f"Error creating {table['TableName']}: {e}")
                 
+    if created_tables:
+        logger.info("Waiting for primary tables to become ACTIVE in DynamoDB...")
+        waiter = dynamodb.get_waiter('table_exists')
+        for tname in created_tables[:3]:  # Wait for primary tables like Users/Patients
+            try:
+                waiter.wait(TableName=tname, WaiterConfig={'Delay': 2, 'MaxAttempts': 15})
+            except Exception:
+                pass
+
     logger.info("Table creation script completed.")
 
 if __name__ == '__main__':

@@ -15,7 +15,19 @@ def seed_admin():
     email = os.environ.get('ADMIN_EMAIL', 'admin@medtrack.local')
     password = os.environ.get('ADMIN_PASSWORD', 'Admin@123!')
     
-    existing = repo.get_user_by_email(email)
+    try:
+        existing = repo.get_user_by_email(email)
+    except Exception as e:
+        if "email-index" in str(e) or "ValidationException" in str(e):
+            print("\n⚠️ The 'MedTrack-Users' table does not have the required 'email-index'.")
+            print("This happens when the table was created manually in the console without its Global Secondary Index.")
+            print("\n👉 To fix this, run:")
+            print("   aws dynamodb delete-table --table-name MedTrack-Users --region us-east-1")
+            print("   python scripts/create_tables.py")
+            print("   python scripts/seed_admin.py\n")
+            return
+        raise e
+
     if existing:
         print(f"Admin {email} already exists.")
         return
