@@ -1,6 +1,7 @@
 import pytest
 import boto3
 import io
+import os
 from moto import mock_aws
 from app.services.storage_service import StorageService
 
@@ -8,7 +9,13 @@ from app.services.storage_service import StorageService
 def s3_setup(aws_credentials):
     with mock_aws():
         s3 = boto3.client('s3', region_name='us-east-1')
-        s3.create_bucket(Bucket='medtrack-documents-local')
+        bucket = os.environ.get('S3_BUCKET_NAME', 'medtrack-documents-local')
+        s3.create_bucket(Bucket=bucket)
+        if bucket != 'medtrack-documents-local':
+            try:
+                s3.create_bucket(Bucket='medtrack-documents-local')
+            except Exception:
+                pass
         yield
 
 def test_upload_and_presign(s3_setup):

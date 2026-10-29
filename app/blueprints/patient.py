@@ -15,9 +15,17 @@ def before_request():
 @patient_bp.route('/dashboard')
 def dashboard():
     svc = PatientService()
-    appts = svc.get_appointments(session['user_id'])
-    upcoming = [a for a in appts if a['Status'] in ['Pending', 'Confirmed']]
-    return render_template('patient/dashboard.html', upcoming=upcoming)
+    appts = svc.get_appointments(session['user_id']) or []
+    upcoming = [a for a in appts if a.get('Status') in ['Pending', 'Confirmed']]
+    pending = [a for a in appts if a.get('Status') == 'Pending']
+    completed = [a for a in appts if a.get('Status') == 'Completed']
+    counts = {
+        'total': len(appts),
+        'upcoming': len(upcoming),
+        'pending': len(pending),
+        'completed': len(completed)
+    }
+    return render_template('patient/dashboard.html', upcoming=upcoming, counts=counts)
 
 @patient_bp.route('/profile', methods=['GET', 'POST'])
 def profile():
@@ -186,7 +194,3 @@ def serve_file(filename):
     directory = os.path.dirname(safe_path)
     base_file = os.path.basename(safe_path)
     return send_from_directory(directory, base_file)
-
-
-
-

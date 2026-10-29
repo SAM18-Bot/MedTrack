@@ -16,12 +16,19 @@ def before_request():
 def dashboard():
     svc = DoctorService()
     today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
-    queue = svc.get_queue(session['user_id'], today)
+    queue = svc.get_queue(session['user_id'], today) or []
     doc = svc.get_profile(session['user_id'])
-    # Revenue approx
-    completed = [q for q in queue if q['Status'] == 'Completed']
-    daily_revenue = len(completed) * float(doc.get('ConsultationFee', 0)) if doc else 0
-    return render_template('doctor/dashboard.html', queue=queue, rev=daily_revenue, doctor=doc)
+    completed = [q for q in queue if q.get('Status') == 'Completed']
+    pending = [q for q in queue if q.get('Status') == 'Pending']
+    fee = float(doc.get('ConsultationFee', 0)) if doc and doc.get('ConsultationFee') else 0.0
+    daily_revenue = len(completed) * fee
+    counts = {
+        'today': len(queue),
+        'pending': len(pending),
+        'completed': len(completed),
+        'revenue': daily_revenue
+    }
+    return render_template('doctor/dashboard.html', queue=queue, rev=daily_revenue, doctor=doc, counts=counts)
 
 @doctor_bp.route('/profile', methods=['GET', 'POST'])
 def profile():
@@ -115,4 +122,3 @@ def patient_detail(id):
     svc = DoctorService()
     appt = svc.get_appointment(id)
     return render_template('doctor/patient_detail.html', appointment=appt)
-

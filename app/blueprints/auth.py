@@ -16,7 +16,10 @@ def login():
                 form.email.data, form.password.data, 
                 request.remote_addr or '127.0.0.1', request.user_agent.string or 'unknown'
             )
+            csrf_tok = session.get('csrf_token')
             session.clear()
+            if csrf_tok:
+                session['csrf_token'] = csrf_tok
             session['user_id'] = user['UserID']
             session['role'] = user['Role']
             if form.remember_me.data:

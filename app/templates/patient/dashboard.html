@@ -9,7 +9,7 @@
       <span class="mt-pulse-dot"></span>
       <span>Clinical Care Active &bull; <span class="mt-live-date">Today</span></span>
     </div>
-    <h2 class="mt-dash-banner-title">Welcome back, {{ current_user.name.split(' ')[0] }}</h2>
+    <h2 class="mt-dash-banner-title">Welcome back, {{ current_user.name.split(' ')[0] if (current_user and current_user.name) else 'Patient' }}</h2>
     <p class="mt-dash-banner-subtitle">
       Manage your medical consultations, follow-ups, and encrypted diagnostic reports from your personal healthcare portal.
     </p>
@@ -29,7 +29,7 @@
   <div class="mt-stat-enhanced" style="--stat-color: #1D4ED8; --stat-bg: #EFF6FF;">
     <div class="mt-stat-enhanced-header">
       <div>
-        <div class="mt-stat-enhanced-value">{{ counts.total or 0 }}</div>
+        <div class="mt-stat-enhanced-value">{{ (counts.total if counts else (upcoming|length if upcoming is defined else 0)) or 0 }}</div>
         <div class="mt-stat-enhanced-label">Total Consultations</div>
       </div>
       <div class="mt-stat-enhanced-icon">
@@ -44,7 +44,7 @@
   <div class="mt-stat-enhanced" style="--stat-color: #0284C7; --stat-bg: #F0F9FF;">
     <div class="mt-stat-enhanced-header">
       <div>
-        <div class="mt-stat-enhanced-value">{{ counts.upcoming or 0 }}</div>
+        <div class="mt-stat-enhanced-value">{{ (counts.upcoming if counts else (upcoming|length if upcoming is defined else 0)) or 0 }}</div>
         <div class="mt-stat-enhanced-label">Upcoming Visits</div>
       </div>
       <div class="mt-stat-enhanced-icon" style="color: #0284C7; background: #E0F2FE;">
@@ -59,7 +59,7 @@
   <div class="mt-stat-enhanced" style="--stat-color: #D97706; --stat-bg: #FEF3C7;">
     <div class="mt-stat-enhanced-header">
       <div>
-        <div class="mt-stat-enhanced-value">{{ counts.pending or 0 }}</div>
+        <div class="mt-stat-enhanced-value">{{ (counts.pending if counts else 0) or 0 }}</div>
         <div class="mt-stat-enhanced-label">Pending Approval</div>
       </div>
       <div class="mt-stat-enhanced-icon" style="color: #D97706; background: #FEF3C7;">
@@ -74,7 +74,7 @@
   <div class="mt-stat-enhanced" style="--stat-color: #059669; --stat-bg: #ECFDF5;">
     <div class="mt-stat-enhanced-header">
       <div>
-        <div class="mt-stat-enhanced-value">{{ counts.completed or 0 }}</div>
+        <div class="mt-stat-enhanced-value">{{ (counts.completed if counts else 0) or 0 }}</div>
         <div class="mt-stat-enhanced-label">Completed Visits</div>
       </div>
       <div class="mt-stat-enhanced-icon" style="color: #059669; background: #ECFDF5;">

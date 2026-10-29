@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, render_template, session, g
+from flask import Flask, render_template, session, g, redirect, url_for, flash
 from app.config import Config
 from app.extensions import csrf, limiter
 
@@ -23,38 +23,61 @@ def get_current_user():
     try:
         from app.repositories.user_repository import UserRepository
         u = UserRepository().get_user(user_id)
-        if not u:
-            g._current_user = None
-            return None
-        role = u.get('Role', 'Patient')
-        name = u.get('Email', 'User').split('@')[0].capitalize()
+        role = session.get('role', 'Patient')
+        email = ''
+        phone = ''
+        if u:
+            role = u.get('Role', role)
+            email = u.get('Email', '')
+            phone = u.get('Phone', '')
+        
+        name = email.split('@')[0].capitalize() if email else role
         spec = None
+
         if role == 'Patient':
             from app.repositories.patient_repository import PatientRepository
-            p = PatientRepository().get_patient(user_id)
+            repo = PatientRepository()
+            p = repo.get_patient(user_id)
             if p and p.get('Name'):
                 name = p['Name']
         elif role == 'Doctor':
             from app.repositories.doctor_repository import DoctorRepository
-            d = DoctorRepository().get_doctor(user_id)
+            repo = DoctorRepository()
+            d = repo.get_doctor(user_id)
             if d and d.get('Name'):
                 name = d['Name']
                 spec = d.get('SpecializationID')
+        elif role == 'Admin':
+            name = 'Administrator'
+
         user_obj = {
             'id': user_id,
-            'name': name,
-            'email': u.get('Email', ''),
+            'name': name or 'User',
+            'email': email,
             'role': role.lower(),
             'role_display': role,
             'specialization': spec,
             'profile_picture': None,
-            'phone': u.get('Phone', '')
+            'phone': phone
         }
         g._current_user = user_obj
         return user_obj
-    except Exception:
-        g._current_user = None
-        return None
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Note in get_current_user: {e}")
+        fallback_role = session.get('role', 'Patient')
+        user_obj = {
+            'id': user_id,
+            'name': fallback_role,
+            'email': '',
+            'role': fallback_role.lower(),
+            'role_display': fallback_role,
+            'specialization': None,
+            'profile_picture': None,
+            'phone': ''
+        }
+        g._current_user = user_obj
+        return user_obj
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -66,6 +89,12 @@ def create_app(config_class=Config):
     csrf.init_app(app)
     limiter.init_app(app)
     app.jinja_env.filters['dr'] = with_dr
+
+    from flask_wtf.csrf import CSRFError
+    @app.errorhandler(CSRFError)
+    def handle_csrf_error(e):
+        flash("Your session timed out or form was expired. Please try signing in again.", "warning")
+        return redirect(url_for('auth.login'))
 
     @app.context_processor
     def inject_user_context():
