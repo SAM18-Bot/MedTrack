@@ -53,6 +53,10 @@ def profile():
         return redirect(url_for('patient.profile'))
     return render_template('patient/profile.html', form=form)
 
+@patient_bp.route('/book')
+def book():
+    return redirect(url_for('patient.doctors'))
+
 @patient_bp.route('/doctors', methods=['GET', 'POST'])
 def doctors():
     form = DoctorSearchForm()
@@ -182,6 +186,7 @@ def serve_file(filename):
     directory = os.path.dirname(safe_path)
     base_file = os.path.basename(safe_path)
     return send_from_directory(directory, base_file)
+
 
 
 

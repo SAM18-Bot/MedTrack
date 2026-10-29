@@ -1,35 +1,160 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">Vitals Tracker</h1>
-<div class="row">
-    <div class="col-md-4">
-        <form method="POST" class="card p-3 shadow-sm border-0">
-            {{ form.hidden_tag() }}
-            {{ form.blood_pressure.label }} {{ form.blood_pressure(class="form-control mb-2") }}
-            {{ form.sugar_level.label }} {{ form.sugar_level(class="form-control mb-2") }}
-            {{ form.weight.label }} {{ form.weight(class="form-control mb-2") }}
-            {{ form.heart_rate.label }} {{ form.heart_rate(class="form-control mb-3") }}
-            {{ form.submit(class="btn btn-primary") }}
-        </form>
-    </div>
-    <div class="col-md-8">
-        <div class="card p-3 shadow-sm border-0">
-            <canvas id="vitalsChart"></canvas>
-        </div>
-    </div>
+{% extends "base.html" %}
+{% block page_title %}Vitals & Biometric Tracker - MedTrack{% endblock %}
+
+{% block content %}
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">Personal Vitals Tracker</h1>
+    <p class="mt-page-subtitle">Log and monitor blood pressure, resting heart rate, blood glucose, and body weight over time.</p>
+  </div>
 </div>
+
+<div class="row g-4 mb-4">
+  <!-- Log New Vitals Form -->
+  <div class="col-lg-4">
+    <div class="mt-card h-100">
+      <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #1e293b;">
+        <i class="bi bi-heart-pulse text-danger me-2"></i>Log New Measurement
+      </h3>
+      <p class="text-muted small mb-3">Record daily biometric data for your clinical care team to review.</p>
+
+      <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+          <label class="form-label" style="font-weight: 500;">Blood Pressure (mmHg)</label>
+          {{ form.blood_pressure(class="form-control", placeholder="e.g. 120/80") }}
+          {% for error in form.blood_pressure.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" style="font-weight: 500;">Blood Glucose (mg/dL)</label>
+          {{ form.sugar_level(class="form-control", placeholder="e.g. 95") }}
+          {% for error in form.sugar_level.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" style="font-weight: 500;">Body Weight (kg)</label>
+          {{ form.weight(class="form-control", placeholder="e.g. 70.5") }}
+          {% for error in form.weight.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" style="font-weight: 500;">Heart Rate (BPM)</label>
+          {{ form.heart_rate(class="form-control", placeholder="e.g. 72") }}
+          {% for error in form.heart_rate.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <button type="submit" class="mt-btn mt-btn-primary w-100">
+          <i class="bi bi-check2-circle me-1"></i> Save Measurement
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Vitals Chart & Trends -->
+  <div class="col-lg-8">
+    <div class="mt-card h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 style="font-size: 1.1rem; font-weight: 600; margin: 0; color: #1e293b;">
+          <i class="bi bi-graph-up text-primary me-2"></i>Biometric Trends
+        </h3>
+        <span class="badge bg-light text-dark border">Recent Logs</span>
+      </div>
+      <div style="min-height: 280px; position: relative;">
+        <canvas id="vitalsChart"></canvas>
+      </div>
+
+      {% if vitals %}
+      <div class="mt-4 pt-3 border-top">
+        <h4 style="font-size: 0.95rem; font-weight: 600; color: #475569; margin-bottom: 0.75rem;">Recent Logs</h4>
+        <div class="table-responsive">
+          <table class="mt-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>BP (mmHg)</th>
+                <th>Heart Rate</th>
+                <th>Glucose</th>
+                <th>Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for v in vitals[:5] %}
+              <tr>
+                <td><small class="text-muted">{{ v.RecordedAt[:10] if v.RecordedAt else 'N/A' }}</small></td>
+                <td><strong>{{ v.BloodPressure or '-' }}</strong></td>
+                <td>{{ v.HeartRate or '-' }} bpm</td>
+                <td>{{ v.SugarLevel or '-' }} mg/dL</td>
+                <td>{{ v.Weight or '-' }} kg</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% else %}
+      <div class="mt-empty py-4">
+        <i class="bi bi-activity fs-2 text-muted d-block mb-2"></i>
+        <p class="text-muted mb-0">No vitals recorded yet. Record your first measurement on the left to see trend charts.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+  document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('vitalsChart');
+    if (!ctx) return;
     const vitalsData = {{ vitals_json | safe }};
+    if (!vitalsData || vitalsData.length === 0) return;
+
+    // Sort chronologically
+    vitalsData.sort((a, b) => new Date(a.RecordedAt) - new Date(b.RecordedAt));
+
     new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: vitalsData.map(v => new Date(v.RecordedAt).toLocaleDateString()),
-            datasets: [
-                {label: 'Heart Rate', data: vitalsData.map(v => v.HeartRate), borderColor: 'red'},
-                {label: 'Weight', data: vitalsData.map(v => v.Weight), borderColor: 'blue'}
-            ]
+      type: 'line',
+      data: {
+        labels: vitalsData.map(v => v.RecordedAt ? v.RecordedAt.substring(0, 10) : ''),
+        datasets: [
+          {
+            label: 'Heart Rate (bpm)',
+            data: vitalsData.map(v => v.HeartRate),
+            borderColor: '#dc2626',
+            backgroundColor: 'rgba(220, 38, 38, 0.1)',
+            tension: 0.3,
+            fill: true
+          },
+          {
+            label: 'Weight (kg)',
+            data: vitalsData.map(v => v.Weight),
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            tension: 0.3,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top' }
+        },
+        scales: {
+          y: { beginAtZero: false }
         }
+      }
     });
+  });
 </script>
 {% endblock %}

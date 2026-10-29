@@ -1,11 +1,66 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">Raise Support Ticket</h1>
-<form method="POST" class="w-50">
-    {{ form.hidden_tag() }}
-    {{ form.category.label(class="form-label") }} {{ form.category(class="form-select mb-3") }}
-    {{ form.priority.label(class="form-label") }} {{ form.priority(class="form-select mb-3") }}
-    {{ form.subject.label(class="form-label") }} {{ form.subject(class="form-control mb-3") }}
-    {{ form.description.label(class="form-label") }} {{ form.description(class="form-control mb-3") }}
-    {{ form.submit(class="btn btn-primary") }}
-</form>
+{% extends "base.html" %}
+{% block page_title %}Open Support Ticket - MedTrack{% endblock %}
+
+{% block content %}
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">Submit a Support Ticket</h1>
+    <p class="mt-page-subtitle">Need assistance with your account, consultations, or technical questions? Let our team know.</p>
+  </div>
+  <div class="mt-header-actions">
+    <a href="{{ url_for('support.tickets') }}" class="mt-btn mt-btn-outline">
+      <i class="bi bi-clock-history me-1"></i> My Tickets
+    </a>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="mt-card">
+      <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label" style="font-weight: 500;">Inquiry Category</label>
+            {{ form.category(class="form-select") }}
+            {% for error in form.category.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" style="font-weight: 500;">Urgency Priority</label>
+            {{ form.priority(class="form-select") }}
+            {% for error in form.priority.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" style="font-weight: 500;">Ticket Subject</label>
+          {{ form.subject(class="form-control", placeholder="Brief description of the issue...") }}
+          {% for error in form.subject.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" style="font-weight: 500;">Detailed Description</label>
+          {{ form.description(class="form-control", rows="5", placeholder="Provide relevant details, appointment references, or error messages encountered...") }}
+          {% for error in form.description.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+          <a href="{{ url_for('support.help_center') }}" class="mt-btn mt-btn-outline">Cancel</a>
+          <button type="submit" class="mt-btn mt-btn-primary">
+            <i class="bi bi-send me-1"></i> Submit Ticket
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}

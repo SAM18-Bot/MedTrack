@@ -1,34 +1,168 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">Medical Documents</h1>
-<div class="row">
-    <div class="col-md-4">
-        <form method="POST" enctype="multipart/form-data" class="card p-3 shadow-sm border-0">
-            {{ form.hidden_tag() }}
-            {{ form.title.label }} {{ form.title(class="form-control mb-2") }}
-            {{ form.document.label }} {{ form.document(class="form-control mb-3") }}
-            {{ form.submit(class="btn btn-primary") }}
-        </form>
+{% extends "base.html" %}
+{% block page_title %}Medical Documents & Prescriptions - MedTrack{% endblock %}
+
+{% block content %}
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">Medical Documents & Prescriptions</h1>
+    <p class="mt-page-subtitle">Upload lab reports, diagnostic scans, and download official PDF prescriptions.</p>
+  </div>
+  <div class="mt-header-actions">
+    <a href="{{ url_for('patient.records') }}" class="mt-btn mt-btn-outline">
+      <i class="bi bi-clock-history"></i> Medical Records
+    </a>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Upload Document Card -->
+  <div class="col-lg-4">
+    <div class="mt-card h-100">
+      <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #1e293b;">
+        <i class="bi bi-cloud-arrow-up text-primary me-2"></i>Upload New Document
+      </h3>
+      <p class="text-muted small mb-3">Upload lab reports, imaging files, or prior clinical summaries (PDF, JPG, PNG).</p>
+
+      <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+          <label class="form-label" style="font-weight: 500;">Document Title</label>
+          {{ form.title(class="form-control", placeholder="e.g. Blood Test Report, MRI Scan") }}
+          {% for error in form.title.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" style="font-weight: 500;">Choose File</label>
+          {{ form.document(class="form-control") }}
+          <div class="form-text small">Max size: 10MB. Formats: PDF, PNG, JPG</div>
+          {% for error in form.document.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <button type="submit" class="mt-btn mt-btn-primary w-100">
+          <i class="bi bi-upload me-1"></i> Upload Document
+        </button>
+      </form>
     </div>
-    <div class="col-md-8">
-        <table class="table table-striped">
-            <tr><th>Title</th><th>Uploaded At</th><th>Action</th></tr>
+  </div>
+
+  <!-- Documents Table -->
+  <div class="col-lg-8">
+    <div class="mt-card h-100" style="padding: 0; overflow: hidden;">
+      <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+        <h3 style="margin: 0; font-size: 1rem; font-weight: 600;">
+          <i class="bi bi-folder2-open text-primary me-2"></i>Uploaded Documents
+        </h3>
+        <span class="badge bg-secondary">{{ documents|length }} file{% if documents|length != 1 %}s{% endif %}</span>
+      </div>
+
+      {% if documents %}
+      <div class="table-responsive">
+        <table class="mt-table">
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Uploaded Date</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
             {% for doc in documents %}
             <tr>
-                <td>{{ doc.Title }}</td><td>{{ doc.UploadedAt }}</td>
-                <td><a href="{{ url_for('patient.download_document', doc_id=doc.DocumentID) }}" target="_blank" class="btn btn-sm btn-info">View / Download</a></td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="rounded-3 p-2 bg-light border me-3">
+                    <i class="bi bi-file-earmark-text text-primary fs-5"></i>
+                  </div>
+                  <div>
+                    <strong style="color: #1e293b; font-size: 0.95rem;">{{ doc.Title }}</strong>
+                    <div class="text-muted small">Document ID: {{ doc.DocumentID[:8] }}...</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="text-muted">{{ doc.UploadedAt[:10] if doc.UploadedAt else 'N/A' }}</span>
+              </td>
+              <td style="text-align: right;">
+                <a href="{{ url_for('patient.download_document', doc_id=doc.DocumentID) }}" target="_blank" class="mt-btn mt-btn-outline mt-btn-sm">
+                  <i class="bi bi-download me-1"></i> Download
+                </a>
+              </td>
             </tr>
-            {% else %}<tr><td colspan="3">No documents uploaded.</td></tr>{% endfor %}
+            {% endfor %}
+          </tbody>
         </table>
+      </div>
+      {% else %}
+      <div class="mt-empty py-4">
+        <i class="bi bi-file-earmark-arrow-up fs-2 text-muted d-block mb-2"></i>
+        <p class="text-muted mb-0">No documents uploaded yet. Use the form on the left to upload.</p>
+      </div>
+      {% endif %}
     </div>
+  </div>
 </div>
-<h2 class="mt-5 mb-4">Prescriptions</h2>
-<table class="table table-striped">
-    <tr><th>Date</th><th>Medicines</th><th>Action</th></tr>
-    {% for rx in prescriptions %}
-    <tr>
-        <td>{{ rx.CreatedAt }}</td><td>{{ rx.Medicines[:30] }}...</td>
-        <td><a href="{{ url_for('patient.download_prescription', rx_id=rx.PrescriptionID) }}" class="btn btn-sm btn-success">Generate PDF</a></td>
-    </tr>
-    {% else %}<tr><td colspan="3">No prescriptions found.</td></tr>{% endfor %}
-</table>
+
+<!-- Official Prescriptions Card -->
+<div class="mt-card" style="padding: 0; overflow: hidden;">
+  <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+    <div>
+      <h3 style="margin: 0; font-size: 1rem; font-weight: 600;">
+        <i class="bi bi-prescription2 text-success me-2"></i>Prescriptions & Medications
+      </h3>
+      <p class="text-muted small mb-0">Official doctor-signed digital prescriptions generated via ReportLab.</p>
+    </div>
+    <span class="badge bg-secondary">{{ prescriptions|length }} prescription{% if prescriptions|length != 1 %}s{% endif %}</span>
+  </div>
+
+  {% if prescriptions %}
+  <div class="table-responsive">
+    <table class="mt-table">
+      <thead>
+        <tr>
+          <th>Issued Date</th>
+          <th>Prescribed Medications</th>
+          <th>Consultation Ref</th>
+          <th style="text-align: right;">Prescription PDF</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rx in prescriptions %}
+        <tr>
+          <td>
+            <div style="font-weight: 600; color: #1e293b;">
+              <i class="bi bi-calendar-check me-1 text-muted"></i>
+              {{ rx.CreatedAt[:10] if rx.CreatedAt else 'N/A' }}
+            </div>
+          </td>
+          <td>
+            <div style="max-width: 380px; color: #334155;">
+              {{ rx.Medicines }}
+            </div>
+          </td>
+          <td>
+            <span class="badge bg-light text-dark border">
+              #{{ rx.PrescriptionID[:8] }}
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <a href="{{ url_for('patient.download_prescription', rx_id=rx.PrescriptionID) }}" class="mt-btn mt-btn-primary mt-btn-sm">
+              <i class="bi bi-file-earmark-pdf me-1"></i> Generate PDF
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="mt-empty py-4">
+    <i class="bi bi-prescription fs-2 text-muted d-block mb-2"></i>
+    <p class="text-muted mb-0">No prescriptions issued yet. They will appear here after doctor consultations.</p>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

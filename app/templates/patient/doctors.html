@@ -1,20 +1,70 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">Search Doctors</h1>
-<form method="POST" class="mb-4 d-flex gap-2 align-items-end">
-    {{ form.hidden_tag() }}
-    <div>{{ form.specialization.label }} {{ form.specialization(class="form-control") }}</div>
-    <div>{{ form.city.label }} {{ form.city(class="form-control") }}</div>
-    <div>{{ form.max_fee.label }} {{ form.max_fee(class="form-control") }}</div>
-    <div>{{ form.submit(class="btn btn-primary") }}</div>
-</form>
-<div class="list-group">
-    {% for doc in doctors %}
-    <a href="{{ url_for('patient.doctor_detail', id=doc.DoctorID) }}" class="list-group-item list-group-item-action">
-        <h5 class="mb-1">{{ doc.Name }} - {{ doc.SpecializationID }}</h5>
-        <p class="mb-1">Fee: ${{ doc.ConsultationFee }} | Experience: {{ doc.ExperienceYears }} years</p>
-    </a>
-    {% else %}
-    <p>No doctors found.</p>
-    {% endendfor %}
+{% extends "base.html" %}
+{% block page_title %}Find Medical Specialists{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+  <div>
+    <h2 class="mt-display mb-1" style="font-family: var(--font-display); font-weight: 700;">Find Medical Specialists</h2>
+    <p style="color:var(--mt-ink-soft); margin:0;">Browse accredited physicians across all medical departments.</p>
+  </div>
 </div>
+
+<div class="mt-card p-4 mb-4">
+  <form method="POST" class="row g-3 align-items-end">
+    {{ form.hidden_tag() }}
+    <div class="col-md-4">
+      {{ form.specialization.label(class="form-label") }}
+      {{ form.specialization(class="form-control", placeholder="e.g. Cardiology") }}
+    </div>
+    <div class="col-md-3">
+      {{ form.city.label(class="form-label") }}
+      {{ form.city(class="form-control", placeholder="e.g. New York") }}
+    </div>
+    <div class="col-md-3">
+      {{ form.max_fee.label(class="form-label") }}
+      {{ form.max_fee(class="form-control", placeholder="e.g. 150") }}
+    </div>
+    <div class="col-md-2">
+      {{ form.submit(class="btn btn-primary w-100") }}
+    </div>
+  </form>
+</div>
+
+<div class="row g-3">
+  {% for doc in doctors %}
+    <div class="col-md-6 col-lg-4">
+      <div class="mt-card p-4 h-100 d-flex flex-column">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="mt-avatar" style="width:48px;height:48px;font-size:1.1rem;">
+            {{ doc.Name[0] if doc.Name else 'D' }}
+          </div>
+          <div>
+            <h5 class="mb-0 fw-bold">{{ doc.Name|dr if doc.Name else 'Dr. Specialist' }}</h5>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ doc.SpecializationID or 'General Practitioner' }}</span>
+          </div>
+        </div>
+        <p class="text-muted small mb-3 flex-grow-1">
+          {{ doc.Bio or 'Accredited specialist providing comprehensive outpatient care and diagnostic consultations.' }}
+        </p>
+        <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+          <div>
+            <strong class="text-primary">${{ doc.ConsultationFee or 100 }}</strong>
+            <span class="text-muted small">/ consult</span>
+          </div>
+          <a href="{{ url_for('patient.doctor_detail', id=doc.DoctorID) }}" class="btn btn-sm btn-outline-primary">
+            View Profile &rarr;
+          </a>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="col-12">
+      <div class="mt-empty py-5 text-center">
+        <i class="bi bi-search fs-1 text-muted mb-2 d-block"></i>
+        <p class="text-muted mb-0">No medical doctors found matching your criteria.</p>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
 {% endblock %}

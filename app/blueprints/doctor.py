@@ -115,3 +115,4 @@ def patient_detail(id):
     svc = DoctorService()
     appt = svc.get_appointment(id)
     return render_template('doctor/patient_detail.html', appointment=appt)
+

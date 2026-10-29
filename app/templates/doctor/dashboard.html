@@ -1,16 +1,163 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">Doctor Dashboard</h1>
-{% if doctor and doctor.Status == 'Pending' %}
-<div class="alert alert-warning">Your account is pending admin approval. You cannot receive bookings yet.</div>
-{% endif %}
-<div class="row">
-    <div class="col-md-4"><div class="card p-3 bg-primary text-white mb-3 border-0"><h5>Today's Queue</h5><h2>{{ queue|length }}</h2></div></div>
-    <div class="col-md-4"><div class="card p-3 bg-success text-white mb-3 border-0"><h5>Daily Revenue</h5><h2>${{ rev }}</h2></div></div>
+{% extends "base.html" %}
+{% block page_title %}Physician Portal{% endblock %}
+{% block content %}
+
+<!-- Physician Hero Banner -->
+<div class="mt-dash-banner">
+  <div class="mt-dash-banner-content">
+    <div class="mt-dash-banner-tag">
+      <span class="mt-pulse-dot"></span>
+      <span>
+        {% if current_user.specialization %}{{ current_user.specialization }} Department{% else %}Attending Physician{% endif %} &bull; <span class="mt-live-date">Today</span>
+      </span>
+    </div>
+    <h2 class="mt-dash-banner-title">Welcome, Dr. {{ current_user.name.split(' ')[-1] }}</h2>
+    <p class="mt-dash-banner-subtitle">
+      Manage today's clinical consultations, verify patient diagnosis documents, and review historical diagnostic charts.
+    </p>
+  </div>
+  <div class="mt-dash-banner-actions">
+    <a href="{{ url_for('doctor.queue') }}" class="mt-dash-btn-primary">
+      <i class="bi bi-calendar2-week-fill"></i> View Schedule
+    </a>
+    <a href="{{ url_for('doctor.availability') }}" class="mt-dash-btn-ghost">
+      <i class="bi bi-clock-history"></i> Set Availability
+    </a>
+  </div>
 </div>
-<div class="mt-4">
-    <h3>Quick Links</h3>
-    <a href="{{ url_for('doctor.queue') }}" class="btn btn-outline-primary">Manage Queue</a>
-    <a href="{{ url_for('doctor.availability') }}" class="btn btn-outline-primary">Set Availability</a>
-    <a href="{{ url_for('doctor.profile') }}" class="btn btn-outline-primary">My Profile</a>
+
+<!-- Physician Metric Stat Cards -->
+<div class="mt-stat-grid mb-4">
+  <div class="mt-stat-enhanced" style="--stat-color: #1D4ED8; --stat-bg: #EFF6FF;">
+    <div class="mt-stat-enhanced-header">
+      <div>
+        <div class="mt-stat-enhanced-value">{{ counts.today or 0 }}</div>
+        <div class="mt-stat-enhanced-label">Today's Visits</div>
+      </div>
+      <div class="mt-stat-enhanced-icon">
+        <i class="bi bi-calendar2-day-fill"></i>
+      </div>
+    </div>
+    <div class="mt-stat-enhanced-sub">
+      <i class="bi bi-calendar-check text-primary"></i> Scheduled for today
+    </div>
+  </div>
+
+  <div class="mt-stat-enhanced" style="--stat-color: #D97706; --stat-bg: #FEF3C7;">
+    <div class="mt-stat-enhanced-header">
+      <div>
+        <div class="mt-stat-enhanced-value">{{ counts.pending or 0 }}</div>
+        <div class="mt-stat-enhanced-label">Pending Requests</div>
+      </div>
+      <div class="mt-stat-enhanced-icon" style="color: #D97706; background: #FEF3C7;">
+        <i class="bi bi-hourglass-top"></i>
+      </div>
+    </div>
+    <div class="mt-stat-enhanced-sub">
+      <i class="bi bi-clock-history text-warning"></i> Awaiting doctor review
+    </div>
+  </div>
+
+  <div class="mt-stat-enhanced" style="--stat-color: #059669; --stat-bg: #ECFDF5;">
+    <div class="mt-stat-enhanced-header">
+      <div>
+        <div class="mt-stat-enhanced-value">{{ counts.completed or 0 }}</div>
+        <div class="mt-stat-enhanced-label">Completed Consults</div>
+      </div>
+      <div class="mt-stat-enhanced-icon" style="color: #059669; background: #ECFDF5;">
+        <i class="bi bi-check2-circle"></i>
+      </div>
+    </div>
+    <div class="mt-stat-enhanced-sub">
+      <i class="bi bi-shield-check text-success"></i> Finished consultations
+    </div>
+  </div>
+
+  <div class="mt-stat-enhanced" style="--stat-color: #7C3AED; --stat-bg: #F5F3FF;">
+    <div class="mt-stat-enhanced-header">
+      <div>
+        <div class="mt-stat-enhanced-value">${{ "%.2f"|format(counts.revenue or 0) }}</div>
+        <div class="mt-stat-enhanced-label">Estimated Revenue</div>
+      </div>
+      <div class="mt-stat-enhanced-icon" style="color: #7C3AED; background: #F5F3FF;">
+        <i class="bi bi-cash-stack"></i>
+      </div>
+    </div>
+    <div class="mt-stat-enhanced-sub">
+      <i class="bi bi-graph-up text-purple"></i> Daily consultation billings
+    </div>
+  </div>
 </div>
+
+<!-- Quick Navigation Links -->
+<div class="d-flex align-items-center gap-2 flex-wrap mb-4">
+  <a href="{{ url_for('doctor.queue') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-people me-1"></i> Patient Queue
+  </a>
+  <a href="{{ url_for('doctor.availability') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-calendar-range me-1"></i> Schedule Slots
+  </a>
+  <a href="{{ url_for('doctor.revenue') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-wallet2 me-1"></i> Financials
+  </a>
+  <a href="{{ url_for('doctor.reviews') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-star me-1"></i> Reviews
+  </a>
+  <a href="{{ url_for('doctor.profile') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-person-badge me-1"></i> Edit Profile
+  </a>
+</div>
+
+<!-- Patient Queue Table -->
+<div class="mt-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="h5 mb-0" style="font-family: var(--font-display); font-weight: 700;">Today's Patient Queue</h3>
+    <a href="{{ url_for('doctor.queue') }}" class="btn btn-sm btn-outline-primary">Full Queue</a>
+  </div>
+
+  {% if queue %}
+    <div class="mt-table-wrap">
+      <table class="mt-table">
+        <thead>
+          <tr>
+            <th>Time Slot</th>
+            <th>Patient ID</th>
+            <th>Status</th>
+            <th>Clinical Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for q in queue %}
+            <tr>
+              <td><span class="fw-semibold">{{ q.ScheduledAt }}</span></td>
+              <td>
+                <span class="text-muted">{{ q.PatientID }}</span>
+              </td>
+              <td>
+                {% if q.Status == 'Completed' %}
+                  <span class="badge bg-success-subtle text-success border border-success-subtle">Completed</span>
+                {% elif q.Status == 'Confirmed' %}
+                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Confirmed</span>
+                {% else %}
+                  <span class="badge bg-warning-subtle text-warning border border-warning-subtle">{{ q.Status }}</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{{ url_for('doctor.consultation', appt_id=q.AppointmentID) }}" class="btn btn-sm btn-primary">
+                  <i class="bi bi-clipboard2-pulse"></i> Open Consult
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="mt-empty py-4 text-center">
+      <i class="bi bi-calendar-check fs-1 text-muted mb-2 d-block"></i>
+      <p class="text-muted mb-0">No patient appointments scheduled for today yet.</p>
+    </div>
+  {% endif %}
+</div>
+
 {% endblock %}

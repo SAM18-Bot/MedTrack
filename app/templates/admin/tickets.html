@@ -1,24 +1,94 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">Support Desk</h1>
-<table class="table table-striped">
-    <tr><th>Subject</th><th>Priority</th><th>Status</th><th>Description</th><th>Actions</th></tr>
-    {% for t in tickets %}
-    <tr>
-        <td>{{ t.Subject }}</td><td>{{ t.Priority }}</td>
-        <td>
-            {% if t.Status == 'Resolved' %}<span class="badge bg-success">Resolved</span>
-            {% else %}<span class="badge bg-danger">Open</span>{% endif %}
-        </td>
-        <td>{{ t.Description[:50] }}...</td>
-        <td>
-            {% if t.Status != 'Resolved' %}
-            <form method="POST" action="{{ url_for('admin.resolve_ticket', id=t.TicketID) }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <button class="btn btn-sm btn-success">Resolve</button>
-            </form>
+{% extends "base.html" %}
+{% block page_title %}Support Desk - MedTrack{% endblock %}
+
+{% block content %}
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">Support Desk Management</h1>
+    <p class="mt-page-subtitle">Manage user inquiries, technical support tickets, and guest contact requests.</p>
+  </div>
+  <div class="mt-header-actions">
+    <a href="{{ url_for('admin.dashboard') }}" class="mt-btn mt-btn-outline">
+      <i class="bi bi-shield-lock"></i> Admin Console
+    </a>
+  </div>
+</div>
+
+<div class="mt-card" style="padding: 0; overflow: hidden;">
+  <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+    <h3 style="margin: 0; font-size: 1rem; font-weight: 600;">
+      <i class="bi bi-headset text-primary me-2"></i>Inquiry & Incident Tickets
+    </h3>
+    <span class="badge bg-secondary">{{ tickets|length }} ticket{% if tickets|length != 1 %}s{% endif %}</span>
+  </div>
+
+  {% if tickets %}
+  <div class="table-responsive">
+    <table class="mt-table">
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Message Content</th>
+          <th style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tickets %}
+        <tr>
+          <td>
+            <div style="font-weight: 600; color: #0f172a;">{{ t.Subject }}</div>
+            <small class="text-muted">ID: #{{ t.TicketID[:8] if t.TicketID else '' }}</small>
+          </td>
+          <td>
+            {% if t.Priority == 'High' or t.Priority == 'Critical' %}
+              <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">High</span>
+            {% elif t.Priority == 'Medium' %}
+              <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">Medium</span>
+            {% else %}
+              <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Low</span>
             {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+          </td>
+          <td>
+            {% if t.Status == 'Resolved' %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                <i class="bi bi-check-circle me-1"></i> Resolved
+              </span>
+            {% else %}
+              <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                <i class="bi bi-exclamation-circle me-1"></i> Open
+              </span>
+            {% endif %}
+          </td>
+          <td>
+            <div style="max-width: 340px; color: #475569; font-size: 0.9rem;">
+              {{ t.Description }}
+            </div>
+          </td>
+          <td style="text-align: right;">
+            {% if t.Status != 'Resolved' %}
+              <form method="POST" action="{{ url_for('admin.resolve_ticket', id=t.TicketID) }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button type="submit" class="mt-btn mt-btn-primary mt-btn-sm">
+                  <i class="bi bi-check-lg me-1"></i> Resolve
+                </button>
+              </form>
+            {% else %}
+              <span class="text-muted small">Closed</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="mt-empty py-5">
+    <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+    <h5>No Support Tickets</h5>
+    <p class="text-muted">Inquiries sent via the Contact page or user portal will appear here.</p>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

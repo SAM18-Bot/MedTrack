@@ -1,9 +1,60 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from flask import Flask, render_template
+from flask import Flask, render_template, session, g
 from app.config import Config
 from app.extensions import csrf, limiter
+
+def with_dr(name):
+    if not name:
+        return "Dr. Practitioner"
+    s = str(name).strip()
+    if s.lower().startswith("dr.") or s.lower().startswith("dr "):
+        return s
+    return f"Dr. {s}"
+
+def get_current_user():
+    if hasattr(g, '_current_user'):
+        return g._current_user
+    user_id = session.get('user_id')
+    if not user_id:
+        g._current_user = None
+        return None
+    try:
+        from app.repositories.user_repository import UserRepository
+        u = UserRepository().get_user(user_id)
+        if not u:
+            g._current_user = None
+            return None
+        role = u.get('Role', 'Patient')
+        name = u.get('Email', 'User').split('@')[0].capitalize()
+        spec = None
+        if role == 'Patient':
+            from app.repositories.patient_repository import PatientRepository
+            p = PatientRepository().get_patient(user_id)
+            if p and p.get('Name'):
+                name = p['Name']
+        elif role == 'Doctor':
+            from app.repositories.doctor_repository import DoctorRepository
+            d = DoctorRepository().get_doctor(user_id)
+            if d and d.get('Name'):
+                name = d['Name']
+                spec = d.get('SpecializationID')
+        user_obj = {
+            'id': user_id,
+            'name': name,
+            'email': u.get('Email', ''),
+            'role': role.lower(),
+            'role_display': role,
+            'specialization': spec,
+            'profile_picture': None,
+            'phone': u.get('Phone', '')
+        }
+        g._current_user = user_obj
+        return user_obj
+    except Exception:
+        g._current_user = None
+        return None
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -14,6 +65,22 @@ def create_app(config_class=Config):
         
     csrf.init_app(app)
     limiter.init_app(app)
+    app.jinja_env.filters['dr'] = with_dr
+
+    @app.context_processor
+    def inject_user_context():
+        cu = get_current_user()
+        unread = 0
+        if cu:
+            try:
+                from app.repositories.notification_repository import NotificationRepository
+                unread = NotificationRepository().get_unread_count(cu['id'])
+            except Exception:
+                unread = 0
+        return {
+            'current_user': cu,
+            'unread_notifications': unread
+        }
 
     from app.blueprints.public import public_bp
     from app.blueprints.auth import auth_bp

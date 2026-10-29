@@ -1,23 +1,86 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">User Management</h1>
-<table class="table table-striped align-middle">
-    <tr><th>User ID</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr>
-    {% for u in users %}
-    <tr>
-        <td>{{ u.UserID[:8] }}...</td><td>{{ u.Email }}</td><td>{{ u.Role }}</td>
-        <td>
-            {% if u.IsDeleted %}<span class="badge bg-danger">Suspended</span>
-            {% else %}<span class="badge bg-success">Active</span>{% endif %}
-        </td>
-        <td>
-            {% if not u.IsDeleted and u.Role != 'Admin' %}
-            <form method="POST" action="{{ url_for('admin.ban_user', id=u.UserID) }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <button class="btn btn-sm btn-warning">Suspend</button>
-            </form>
+{% extends "base.html" %}
+{% block page_title %}User Management - MedTrack{% endblock %}
+
+{% block content %}
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">User Account Directory</h1>
+    <p class="mt-page-subtitle">Manage administrative, clinical, and patient credentials and system access permissions.</p>
+  </div>
+  <div class="mt-header-actions">
+    <a href="{{ url_for('admin.dashboard') }}" class="mt-btn mt-btn-outline">
+      <i class="bi bi-shield-lock"></i> Admin Console
+    </a>
+  </div>
+</div>
+
+<div class="mt-card" style="padding: 0; overflow: hidden;">
+  <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+    <h3 style="margin: 0; font-size: 1rem; font-weight: 600;">
+      <i class="bi bi-people text-primary me-2"></i>Registered Accounts
+    </h3>
+    <span class="badge bg-secondary">{{ users|length }} total</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="mt-table">
+      <thead>
+        <tr>
+          <th>User Reference</th>
+          <th>Email Address</th>
+          <th>Access Role</th>
+          <th>Account Status</th>
+          <th style="text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>
+            <div style="font-weight: 600; color: #1e293b;">
+              #{{ u.UserID[:8] }}
+            </div>
+          </td>
+          <td>
+            <span style="font-weight: 500; color: #0f172a;">{{ u.Email }}</span>
+          </td>
+          <td>
+            {% if u.Role == 'Admin' %}
+              <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">Admin</span>
+            {% elif u.Role == 'Doctor' %}
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">Doctor</span>
+            {% else %}
+              <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Patient</span>
             {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+          </td>
+          <td>
+            {% if u.IsDeleted %}
+              <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                <i class="bi bi-slash-circle me-1"></i> Suspended
+              </span>
+            {% else %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                <i class="bi bi-check-circle me-1"></i> Active
+              </span>
+            {% endif %}
+          </td>
+          <td style="text-align: right;">
+            {% if not u.IsDeleted and u.Role != 'Admin' %}
+              <form method="POST" action="{{ url_for('admin.ban_user', id=u.UserID) }}" class="d-inline"
+                    onsubmit="return confirm('Are you sure you want to suspend this user?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button type="submit" class="mt-btn mt-btn-outline mt-btn-sm text-danger border-danger">
+                  <i class="bi bi-slash-circle me-1"></i> Suspend
+                </button>
+              </form>
+            {% else %}
+              <span class="text-muted small">Protected</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

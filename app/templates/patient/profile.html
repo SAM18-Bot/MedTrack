@@ -1,18 +1,128 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">My Profile</h1>
-<form method="POST" class="w-75">
-    {{ form.hidden_tag() }}
-    <div class="row">
-        <div class="col-md-6 mb-3">{{ form.name.label }} {{ form.name(class="form-control") }}</div>
-        <div class="col-md-6 mb-3">{{ form.dob.label }} {{ form.dob(class="form-control") }}</div>
-        <div class="col-md-6 mb-3">{{ form.gender.label }} {{ form.gender(class="form-control") }}</div>
-        <div class="col-md-6 mb-3">{{ form.blood_group.label }} {{ form.blood_group(class="form-control") }}</div>
-        <div class="col-md-6 mb-3">{{ form.height.label }} {{ form.height(class="form-control") }}</div>
-        <div class="col-md-6 mb-3">{{ form.weight.label }} {{ form.weight(class="form-control") }}</div>
-        <div class="col-md-12 mb-3">{{ form.address.label }} {{ form.address(class="form-control") }}</div>
-        <div class="col-md-12 mb-3">{{ form.allergies.label }} {{ form.allergies(class="form-control") }}</div>
-        <div class="col-md-12 mb-3">{{ form.chronic_conditions.label }} {{ form.chronic_conditions(class="form-control") }}</div>
+{% extends "base.html" %}
+{% block page_title %}Patient Profile - MedTrack{% endblock %}
+
+{% block content %}
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">Personal Medical Profile</h1>
+    <p class="mt-page-subtitle">Keep your personal information, emergency biometrics, and medical background updated.</p>
+  </div>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+    <div class="mt-card">
+      <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <!-- Personal Information Section -->
+        <div class="mb-4">
+          <h3 style="font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-bottom: 0.25rem;">
+            <i class="bi bi-person text-primary me-2"></i>Personal Details
+          </h3>
+          <p class="text-muted small mb-3">Basic demographic information used across your health records.</p>
+          
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" style="font-weight: 500;">Full Name</label>
+              {{ form.name(class="form-control") }}
+              {% for error in form.name.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" style="font-weight: 500;">Date of Birth</label>
+              {{ form.dob(class="form-control", placeholder="YYYY-MM-DD") }}
+              {% for error in form.dob.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" style="font-weight: 500;">Gender</label>
+              {{ form.gender(class="form-select") }}
+              {% for error in form.gender.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" style="font-weight: 500;">Blood Group</label>
+              {{ form.blood_group(class="form-select") }}
+              {% for error in form.blood_group.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" style="border-color: #e2e8f0;">
+
+        <!-- Physical Metrics Baseline -->
+        <div class="mb-4">
+          <h3 style="font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-bottom: 0.25rem;">
+            <i class="bi bi-speedometer2 text-primary me-2"></i>Physical Baseline
+          </h3>
+          <p class="text-muted small mb-3">Baseline anthropometric measurements for dose and health calculations.</p>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" style="font-weight: 500;">Height (cm)</label>
+              {{ form.height(class="form-control", placeholder="e.g. 175") }}
+              {% for error in form.height.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" style="font-weight: 500;">Weight (kg)</label>
+              {{ form.weight(class="form-control", placeholder="e.g. 70") }}
+              {% for error in form.weight.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="col-12">
+              <label class="form-label" style="font-weight: 500;">Residential Address</label>
+              {{ form.address(class="form-control", placeholder="Street address, City, State, ZIP") }}
+              {% for error in form.address.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" style="border-color: #e2e8f0;">
+
+        <!-- Clinical Background -->
+        <div class="mb-4">
+          <h3 style="font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-bottom: 0.25rem;">
+            <i class="bi bi-shield-exclamation text-primary me-2"></i>Medical History & Alerts
+          </h3>
+          <p class="text-muted small mb-3">Crucial information for attending physicians and emergency situations.</p>
+
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label" style="font-weight: 500;">Known Allergies (Medications, Foods, Environmental)</label>
+              {{ form.allergies(class="form-control", placeholder="e.g. Penicillin, Peanuts, Latex (leave blank if none)") }}
+              {% for error in form.allergies.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <div class="col-12">
+              <label class="form-label" style="font-weight: 500;">Chronic Conditions / Pre-existing Illnesses</label>
+              {{ form.chronic_conditions(class="form-control", placeholder="e.g. Hypertension, Type 2 Diabetes, Asthma (leave blank if none)") }}
+              {% for error in form.chronic_conditions.errors %}
+                <div class="text-danger small mt-1">{{ error }}</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+          <a href="{{ url_for('patient.dashboard') }}" class="mt-btn mt-btn-outline">Cancel</a>
+          <button type="submit" class="mt-btn mt-btn-primary">
+            <i class="bi bi-check2 me-1"></i> Save Profile Changes
+          </button>
+        </div>
+      </form>
     </div>
-    {{ form.submit(class="btn btn-primary") }}
-</form>
+  </div>
+</div>
 {% endblock %}

@@ -1,14 +1,109 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-2">{{ doctor.Name }}</h1>
-<p class="text-muted">{{ doctor.SpecializationID }} | {{ doctor.ExperienceYears }} Years Experience</p>
-<p>{{ doctor.Bio }}</p>
-<hr>
-<h3>Book Appointment</h3>
-<form method="POST" class="w-50">
-    {{ form.hidden_tag() }}
-    {{ form.date.label }} {{ form.date(class="form-control mb-2", placeholder="YYYY-MM-DD") }}
-    {{ form.time.label }} {{ form.time(class="form-control mb-2", placeholder="HH:MM") }}
-    {{ form.notes.label }} {{ form.notes(class="form-control mb-2") }}
-    {{ form.submit(class="btn btn-success mt-2") }}
-</form>
+{% extends "base.html" %}
+{% block page_title %}{{ doctor.Name|dr }} - MedTrack{% endblock %}
+
+{% block content %}
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">{{ doctor.Name|dr }}</h1>
+    <p class="mt-page-subtitle">{{ doctor.SpecializationID }} &bull; {{ doctor.ExperienceYears or '10+' }} Years Experience</p>
+  </div>
+  <div class="mt-header-actions">
+    <a href="{{ url_for('patient.doctors') }}" class="mt-btn mt-btn-outline">
+      <i class="bi bi-arrow-left me-1"></i> Back to Doctors
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Doctor Bio and Overview -->
+  <div class="col-lg-5">
+    <div class="mt-card h-100">
+      <div class="d-flex align-items-center mb-4">
+        <div class="rounded-circle d-flex align-items-center justify-content-center text-white me-3"
+             style="width: 72px; height: 72px; background: linear-gradient(135deg, #1e3a8a, #2563eb); font-size: 1.8rem; font-weight: 700;">
+          {{ doctor.Name[3] if doctor.Name.startswith('Dr.') and doctor.Name|length > 4 else doctor.Name[0] }}
+        </div>
+        <div>
+          <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0; color: #0f172a;">{{ doctor.Name|dr }}</h2>
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 mt-1">
+            {{ doctor.SpecializationID }}
+          </span>
+          <div class="text-muted small mt-1">Reg No: {{ doctor.RegistrationNumber or 'Verified' }}</div>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <h4 style="font-size: 0.95rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">About the Physician</h4>
+        <p style="color: #334155; line-height: 1.6; font-size: 0.95rem;">
+          {{ doctor.Bio or 'Board-certified medical practitioner committed to patient-centered evidence-based care, thorough diagnosis, and continuous monitoring.' }}
+        </p>
+      </div>
+
+      <div class="border-top pt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-muted">Consultation Fee:</span>
+          <span style="font-size: 1.35rem; font-weight: 700; color: #1e3a8a;">${{ doctor.ConsultationFee or '100' }}</span>
+        </div>
+        {% if doctor.ClinicAddress %}
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-muted">Clinic Location:</span>
+          <span class="text-end" style="color: #1e293b; font-weight: 500;">{{ doctor.ClinicAddress }}</span>
+        </div>
+        {% endif %}
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="text-muted">Verification Status:</span>
+          <span class="badge bg-success-subtle text-success border border-success-subtle">
+            <i class="bi bi-shield-check me-1"></i> Verified Board Practitioner
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Form Card -->
+  <div class="col-lg-7">
+    <div class="mt-card h-100">
+      <h3 style="font-size: 1.2rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">
+        <i class="bi bi-calendar-check text-primary me-2"></i>Schedule a Consultation
+      </h3>
+      <p class="text-muted small mb-4">Choose your preferred visit date, slot time, and describe reason for visit.</p>
+
+      <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label" style="font-weight: 500;">Consultation Date</label>
+            {{ form.date(class="form-control", placeholder="YYYY-MM-DD", type="date") }}
+            {% for error in form.date.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" style="font-weight: 500;">Preferred Time Slot</label>
+            {{ form.time(class="form-control", placeholder="HH:MM (e.g. 10:00)", type="time") }}
+            {% for error in form.time.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" style="font-weight: 500;">Symptoms & Visit Reason</label>
+          {{ form.notes(class="form-control", rows="4", placeholder="Briefly explain symptoms, current concerns, or previous treatments...") }}
+          {% for error in form.notes.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+          <a href="{{ url_for('patient.doctors') }}" class="mt-btn mt-btn-outline">Cancel</a>
+          <button type="submit" class="mt-btn mt-btn-primary">
+            <i class="bi bi-calendar-plus me-1"></i> Confirm Appointment
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 {% endblock %}

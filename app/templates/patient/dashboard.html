@@ -1,14 +1,176 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">Patient Dashboard</h1>
-<div class="row">
-    <div class="col-md-4"><div class="card p-3 shadow-sm mb-3 border-0 bg-primary text-white"><h5>Upcoming Appointments</h5><h2>{{ upcoming|length }}</h2></div></div>
-    <div class="col-md-4"><div class="card p-3 shadow-sm mb-3 border-0 bg-info text-white"><h5>Recent Prescriptions</h5><h2>0</h2></div></div>
-    <div class="col-md-4"><div class="card p-3 shadow-sm mb-3 border-0 bg-secondary text-white"><h5>Unread Notifications</h5><h2>0</h2></div></div>
+{% extends "base.html" %}
+{% block page_title %}Patient Dashboard{% endblock %}
+{% block content %}
+
+<!-- Hero Banner -->
+<div class="mt-dash-banner">
+  <div class="mt-dash-banner-content">
+    <div class="mt-dash-banner-tag">
+      <span class="mt-pulse-dot"></span>
+      <span>Clinical Care Active &bull; <span class="mt-live-date">Today</span></span>
+    </div>
+    <h2 class="mt-dash-banner-title">Welcome back, {{ current_user.name.split(' ')[0] }}</h2>
+    <p class="mt-dash-banner-subtitle">
+      Manage your medical consultations, follow-ups, and encrypted diagnostic reports from your personal healthcare portal.
+    </p>
+  </div>
+  <div class="mt-dash-banner-actions">
+    <a href="{{ url_for('patient.book') }}" class="mt-dash-btn-primary">
+      <i class="bi bi-calendar-plus-fill"></i> Book Appointment
+    </a>
+    <a href="{{ url_for('patient.documents') }}" class="mt-dash-btn-ghost">
+      <i class="bi bi-cloud-arrow-up-fill"></i> Upload Records
+    </a>
+  </div>
 </div>
-<div class="mt-4">
-    <h3>Quick Actions</h3>
-    <a href="{{ url_for('patient.doctors') }}" class="btn btn-outline-primary">Find a Doctor</a>
-    <a href="{{ url_for('patient.vitals') }}" class="btn btn-outline-primary">Log Vitals</a>
-    <a href="{{ url_for('patient.profile') }}" class="btn btn-outline-primary">My Profile</a>
+
+<!-- Enhanced Stat Cards -->
+<div class="mt-stat-grid mb-4">
+  <div class="mt-stat-enhanced" style="--stat-color: #1D4ED8; --stat-bg: #EFF6FF;">
+    <div class="mt-stat-enhanced-header">
+      <div>
+        <div class="mt-stat-enhanced-value">{{ counts.total or 0 }}</div>
+        <div class="mt-stat-enhanced-label">Total Consultations</div>
+      </div>
+      <div class="mt-stat-enhanced-icon">
+        <i class="bi bi-calendar2-check-fill"></i>
+      </div>
+    </div>
+    <div class="mt-stat-enhanced-sub">
+      <i class="bi bi-info-circle text-primary"></i> Lifetime appointment ledger
+    </div>
+  </div>
+
+  <div class="mt-stat-enhanced" style="--stat-color: #0284C7; --stat-bg: #F0F9FF;">
+    <div class="mt-stat-enhanced-header">
+      <div>
+        <div class="mt-stat-enhanced-value">{{ counts.upcoming or 0 }}</div>
+        <div class="mt-stat-enhanced-label">Upcoming Visits</div>
+      </div>
+      <div class="mt-stat-enhanced-icon" style="color: #0284C7; background: #E0F2FE;">
+        <i class="bi bi-clock-history"></i>
+      </div>
+    </div>
+    <div class="mt-stat-enhanced-sub">
+      <i class="bi bi-check-circle text-info"></i> Confirmed & upcoming
+    </div>
+  </div>
+
+  <div class="mt-stat-enhanced" style="--stat-color: #D97706; --stat-bg: #FEF3C7;">
+    <div class="mt-stat-enhanced-header">
+      <div>
+        <div class="mt-stat-enhanced-value">{{ counts.pending or 0 }}</div>
+        <div class="mt-stat-enhanced-label">Pending Approval</div>
+      </div>
+      <div class="mt-stat-enhanced-icon" style="color: #D97706; background: #FEF3C7;">
+        <i class="bi bi-hourglass-split"></i>
+      </div>
+    </div>
+    <div class="mt-stat-enhanced-sub">
+      <i class="bi bi-clock text-warning"></i> Awaiting clinic confirmation
+    </div>
+  </div>
+
+  <div class="mt-stat-enhanced" style="--stat-color: #059669; --stat-bg: #ECFDF5;">
+    <div class="mt-stat-enhanced-header">
+      <div>
+        <div class="mt-stat-enhanced-value">{{ counts.completed or 0 }}</div>
+        <div class="mt-stat-enhanced-label">Completed Visits</div>
+      </div>
+      <div class="mt-stat-enhanced-icon" style="color: #059669; background: #ECFDF5;">
+        <i class="bi bi-check2-all"></i>
+      </div>
+    </div>
+    <div class="mt-stat-enhanced-sub">
+      <i class="bi bi-shield-check text-success"></i> Finished consultations
+    </div>
+  </div>
 </div>
+
+<!-- Quick Navigation Links -->
+<div class="d-flex align-items-center gap-2 flex-wrap mb-4">
+  <a href="{{ url_for('patient.doctors') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-search me-1"></i> Find Doctors
+  </a>
+  <a href="{{ url_for('patient.records') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-file-earmark-medical me-1"></i> Medical History
+  </a>
+  <a href="{{ url_for('patient.vitals') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-activity me-1"></i> Log Vitals
+  </a>
+  <a href="{{ url_for('patient.invoices') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-receipt me-1"></i> Invoices
+  </a>
+  <a href="{{ url_for('patient.profile') }}" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-person me-1"></i> Profile
+  </a>
+</div>
+
+<!-- Appointments Section -->
+<div class="mt-card p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="h5 mb-0" style="font-family: var(--font-display); font-weight: 700;">Upcoming & Recent Consultations</h3>
+    <a href="{{ url_for('patient.appointments') }}" class="btn btn-sm btn-outline-primary">View All Visits</a>
+  </div>
+
+  {% if upcoming or appointments %}
+    <div class="mt-table-wrap">
+      <table class="mt-table">
+        <thead>
+          <tr>
+            <th>Doctor</th>
+            <th>Date & Time</th>
+            <th>Reason / Notes</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in (upcoming if upcoming else appointments[:5]) %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="mt-avatar mt-avatar-sm" style="width:32px;height:32px;font-size:0.85rem;">Dr</div>
+                  <div>
+                    <span class="fw-semibold">Dr. Practitioner</span>
+                  </div>
+                </div>
+              </td>
+              <td>{{ a.ScheduledAt }}</td>
+              <td>{{ a.Reason or 'Routine Checkup' }}</td>
+              <td>
+                {% if a.Status == 'Completed' %}
+                  <span class="badge bg-success-subtle text-success border border-success-subtle">Completed</span>
+                {% elif a.Status == 'Confirmed' %}
+                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Confirmed</span>
+                {% elif a.Status == 'Cancelled' %}
+                  <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Cancelled</span>
+                {% else %}
+                  <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pending</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if a.Status in ['Pending', 'Confirmed', 'Scheduled'] %}
+                  <form method="POST" action="{{ url_for('patient.cancel_appointment', id=a.AppointmentID) }}" class="d-inline" onsubmit="return confirm('Cancel this appointment?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2">Cancel</button>
+                  </form>
+                {% else %}
+                  <span class="text-muted small">&mdash;</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="mt-empty py-4 text-center">
+      <i class="bi bi-calendar-x fs-1 text-muted mb-2 d-block"></i>
+      <p class="text-muted mb-3">You don't have any appointments scheduled yet.</p>
+      <a href="{{ url_for('patient.book') }}" class="btn btn-primary">Book Your First Visit</a>
+    </div>
+  {% endif %}
+</div>
+
 {% endblock %}

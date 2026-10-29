@@ -1,30 +1,111 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">Appointment Queue ({{ date }})</h1>
-<table class="table table-striped align-middle">
-    <tr><th>Time</th><th>Patient ID</th><th>Status</th><th>Notes</th><th>Actions</th></tr>
-    {% for q in queue|sort(attribute='ScheduledAt') %}
-    <tr>
-        <td>{{ q.ScheduledAt.split('T')[1][:5] }}</td>
-        <td>{{ q.PatientID }}</td>
-        <td><span class="badge bg-secondary">{{ q.Status }}</span></td>
-        <td>{{ q.Notes }}</td>
-        <td>
+{% extends "base.html" %}
+{% block page_title %}Patient Queue - MedTrack{% endblock %}
+
+{% block content %}
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">Appointment Queue</h1>
+    <p class="mt-page-subtitle">Schedule for {{ date }}. Review arrivals, confirm visits, and conduct clinical consultations.</p>
+  </div>
+  <div class="mt-header-actions">
+    <a href="{{ url_for('doctor.availability') }}" class="mt-btn mt-btn-outline">
+      <i class="bi bi-calendar3"></i> Manage Slots
+    </a>
+  </div>
+</div>
+
+<div class="mt-card" style="padding: 0; overflow: hidden;">
+  <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+    <h3 style="margin: 0; font-size: 1rem; font-weight: 600;">
+      <i class="bi bi-people text-primary me-2"></i>Today's Scheduled Consultations
+    </h3>
+    <span class="badge bg-secondary">{{ queue|length }} patient{% if queue|length != 1 %}s{% endif %}</span>
+  </div>
+
+  {% if queue %}
+  <div class="table-responsive">
+    <table class="mt-table">
+      <thead>
+        <tr>
+          <th>Time Slot</th>
+          <th>Patient Reference</th>
+          <th>Reason / Notes</th>
+          <th>Status</th>
+          <th style="text-align: right;">Clinical Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for q in queue|sort(attribute='ScheduledAt') %}
+        <tr>
+          <td>
+            <div style="font-weight: 600; color: #1e293b;">
+              <i class="bi bi-clock me-1 text-muted"></i>
+              {{ q.ScheduledAt.split('T')[1][:5] if 'T' in q.ScheduledAt else q.ScheduledAt }}
+            </div>
+          </td>
+          <td>
+            <div style="font-weight: 600; color: #0f172a;">Patient #{{ q.PatientID[:8] }}</div>
+            <small class="text-muted">Appt ID: {{ q.AppointmentID[:8] }}</small>
+          </td>
+          <td>
+            <div style="max-width: 260px; color: #475569; font-size: 0.9rem;">
+              {{ q.Notes or 'General Medical Consultation' }}
+            </div>
+          </td>
+          <td>
             {% if q.Status == 'Pending' %}
-            <form method="POST" action="{{ url_for('doctor.update_status', id=q.AppointmentID) }}" class="d-inline">
+              <span class="mt-status mt-status-pending">Pending</span>
+            {% elif q.Status == 'Confirmed' %}
+              <span class="mt-status mt-status-confirmed">Confirmed</span>
+            {% elif q.Status == 'Completed' %}
+              <span class="mt-status mt-status-completed">Completed</span>
+            {% elif q.Status == 'Cancelled' %}
+              <span class="mt-status mt-status-cancelled">Cancelled</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ q.Status }}</span>
+            {% endif %}
+          </td>
+          <td style="text-align: right;">
+            {% if q.Status == 'Pending' %}
+              <form method="POST" action="{{ url_for('doctor.update_status', id=q.AppointmentID) }}" class="d-inline">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <input type="hidden" name="status" value="Confirmed"/>
-                <button class="btn btn-sm btn-success">Confirm</button>
-            </form>
+                <button type="submit" class="mt-btn mt-btn-primary mt-btn-sm">
+                  <i class="bi bi-check-lg me-1"></i> Confirm
+                </button>
+              </form>
             {% elif q.Status == 'Confirmed' %}
-            <a href="{{ url_for('doctor.consultation', appt_id=q.AppointmentID) }}" class="btn btn-sm btn-primary">Start Consultation</a>
-            <form method="POST" action="{{ url_for('doctor.update_status', id=q.AppointmentID) }}" class="d-inline">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <input type="hidden" name="status" value="No Show"/>
-                <button class="btn btn-sm btn-warning">No Show</button>
-            </form>
+              <div class="d-inline-flex gap-1">
+                <a href="{{ url_for('doctor.consultation', appt_id=q.AppointmentID) }}" class="mt-btn mt-btn-primary mt-btn-sm">
+                  <i class="bi bi-stethoscope me-1"></i> Consult
+                </a>
+                <form method="POST" action="{{ url_for('doctor.update_status', id=q.AppointmentID) }}" class="d-inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <input type="hidden" name="status" value="No Show"/>
+                  <button type="submit" class="mt-btn mt-btn-outline mt-btn-sm text-danger" title="Mark as No Show">
+                    No Show
+                  </button>
+                </form>
+              </div>
+            {% elif q.Status == 'Completed' %}
+              <span class="text-success small fw-semibold">
+                <i class="bi bi-check-circle-fill me-1"></i> Recorded
+              </span>
+            {% else %}
+              <span class="text-muted small">-</span>
             {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="mt-empty py-5">
+    <i class="bi bi-calendar-x fs-1 text-muted d-block mb-3"></i>
+    <h5>No Patients in Queue for {{ date }}</h5>
+    <p class="text-muted">No appointments are currently booked for this schedule date.</p>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

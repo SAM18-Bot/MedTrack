@@ -1,29 +1,77 @@
-{% extends 'base.html' %}
-{% block title %}Medical Records{% endblock %}
+{% extends "base.html" %}
+{% block page_title %}Medical Records - MedTrack{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>Medical Records</h2>
-    <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Date</th>
-                    <th>Diagnosis</th>
-                    <th>Symptoms</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for report in reports %}
-                <tr>
-                    <td>{{ report.CreatedAt }}</td>
-                    <td>{{ report.Diagnosis }}</td>
-                    <td>{{ report.Symptoms }}</td>
-                </tr>
-                {% else %}
-                <tr><td colspan="3" class="text-center">No records found.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">Diagnostic History & Records</h1>
+    <p class="mt-page-subtitle">Your clinical consultation summaries, diagnosis records, and prescribed care plans.</p>
+  </div>
+  <div class="mt-header-actions">
+    <a href="{{ url_for('patient.documents') }}" class="mt-btn mt-btn-outline">
+      <i class="bi bi-file-earmark-medical"></i> View Prescriptions
+    </a>
+  </div>
+</div>
+
+<div class="mt-card" style="padding: 0; overflow: hidden;">
+  <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+    <h3 style="margin: 0; font-size: 1rem; font-weight: 600;">
+      <i class="bi bi-journal-medical text-primary me-2"></i>Past Clinical Consultations
+    </h3>
+    <span class="badge bg-secondary">{{ reports|length }} record{% if reports|length != 1 %}s{% endif %}</span>
+  </div>
+
+  {% if reports %}
+  <div class="table-responsive">
+    <table class="mt-table">
+      <thead>
+        <tr>
+          <th>Consultation Date</th>
+          <th>Diagnosis Summary</th>
+          <th>Reported Symptoms</th>
+          <th>Physician Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in reports %}
+        <tr>
+          <td>
+            <div style="font-weight: 600; color: #1e293b;">
+              <i class="bi bi-calendar3 me-1 text-muted"></i>
+              {{ report.CreatedAt[:10] if report.CreatedAt else 'N/A' }}
+            </div>
+            <small class="text-muted">{{ report.CreatedAt[11:16] if report.CreatedAt and report.CreatedAt|length > 15 else '' }}</small>
+          </td>
+          <td>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1" style="font-size: 0.85rem;">
+              {{ report.Diagnosis }}
+            </span>
+          </td>
+          <td>
+            <div style="max-width: 280px; color: #475569;">
+              {{ report.Symptoms }}
+            </div>
+          </td>
+          <td>
+            <div style="max-width: 240px; color: #64748b; font-size: 0.875rem;">
+              {{ report.Notes if report.Notes else 'Standard consultation follow-up.' }}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="mt-empty py-5">
+    <i class="bi bi-clipboard2-pulse fs-1 text-muted d-block mb-3"></i>
+    <h5>No Medical Records Found</h5>
+    <p class="text-muted">Completed consultations with diagnoses and treatment summaries will appear here.</p>
+    <a href="{{ url_for('patient.doctors') }}" class="mt-btn mt-btn-primary mt-2">
+      <i class="bi bi-search me-1"></i> Find a Doctor
+    </a>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

@@ -1,20 +1,59 @@
-{% extends 'base.html' %}
-{% block title %}My Reviews{% endblock %}
+{% extends "base.html" %}
+{% block page_title %}Patient Reviews - MedTrack{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>My Reviews</h2>
-    <div class="list-group mt-3">
-        {% for review in reviews %}
-        <div class="list-group-item flex-column align-items-start">
-            <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">Rating: {{ review.Rating }}/5</h5>
-                <small>{{ review.CreatedAt }}</small>
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">Patient Reviews & Feedback</h1>
+    <p class="mt-page-subtitle">Verified feedback from patients following completed clinical consultations.</p>
+  </div>
+  <div class="mt-header-actions">
+    <a href="{{ url_for('doctor.profile') }}" class="mt-btn mt-btn-outline">
+      <i class="bi bi-person-gear"></i> Edit Profile
+    </a>
+  </div>
+</div>
+
+<div class="mt-card" style="padding: 0; overflow: hidden;">
+  <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+    <h3 style="margin: 0; font-size: 1rem; font-weight: 600;">
+      <i class="bi bi-star-fill text-warning me-2"></i>Patient Testimonials
+    </h3>
+    <span class="badge bg-secondary">{{ reviews|length }} review{% if reviews|length != 1 %}s{% endif %}</span>
+  </div>
+
+  {% if reviews %}
+  <div class="p-4">
+    <div class="row g-3">
+      {% for review in reviews %}
+      <div class="col-md-6">
+        <div class="p-3 rounded-3 border bg-light h-100">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              {% for i in range(review.Rating|int) %}
+                <i class="bi bi-star-fill text-warning"></i>
+              {% endfor %}
+              {% for i in range(5 - review.Rating|int) %}
+                <i class="bi bi-star text-muted"></i>
+              {% endfor %}
+              <span class="ms-1 fw-bold" style="color: #1e293b;">{{ review.Rating }}.0 / 5</span>
             </div>
-            <p class="mb-1">{{ review.Comment }}</p>
+            <small class="text-muted">{{ review.CreatedAt[:10] if review.CreatedAt else '' }}</small>
+          </div>
+          <p class="mb-0" style="color: #334155; font-size: 0.95rem; font-style: italic;">
+            "{{ review.Comment }}"
+          </p>
         </div>
-        {% else %}
-        <p>No reviews found.</p>
-        {% endfor %}
+      </div>
+      {% endfor %}
     </div>
+  </div>
+  {% else %}
+  <div class="mt-empty py-5">
+    <i class="bi bi-chat-heart fs-1 text-muted d-block mb-3"></i>
+    <h5>No Reviews Yet</h5>
+    <p class="text-muted">Patient reviews submitted after completed consultations will appear here.</p>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

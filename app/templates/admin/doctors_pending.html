@@ -1,23 +1,89 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">Pending Doctor Verifications</h1>
-<table class="table table-striped align-middle">
-    <tr><th>Doctor Name</th><th>Email</th><th>Specialization</th><th>Reg No.</th><th>Actions</th></tr>
-    {% for doc in doctors %}
-    <tr>
-        <td>{{ doc.Name }}</td><td>{{ doc.Email }}</td><td>{{ doc.SpecializationID }}</td><td>{{ doc.RegistrationNumber }}</td>
-        <td>
-            <form method="POST" action="{{ url_for('admin.approve_doctor', id=doc.DoctorID) }}" class="d-inline">
+{% extends "base.html" %}
+{% block page_title %}Doctor Approvals - MedTrack{% endblock %}
+
+{% block content %}
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">Doctor Verification Queue</h1>
+    <p class="mt-page-subtitle">Review credentials, medical registration licenses, and approve physicians to practice on MedTrack.</p>
+  </div>
+  <div class="mt-header-actions">
+    <a href="{{ url_for('admin.dashboard') }}" class="mt-btn mt-btn-outline">
+      <i class="bi bi-shield-lock"></i> Admin Console
+    </a>
+  </div>
+</div>
+
+<div class="mt-card" style="padding: 0; overflow: hidden;">
+  <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+    <h3 style="margin: 0; font-size: 1rem; font-weight: 600;">
+      <i class="bi bi-person-check text-warning me-2"></i>Awaiting Clinical Board Review
+    </h3>
+    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
+      {{ doctors|length }} Pending
+    </span>
+  </div>
+
+  {% if doctors %}
+  <div class="table-responsive">
+    <table class="mt-table">
+      <thead>
+        <tr>
+          <th>Physician</th>
+          <th>Specialization</th>
+          <th>Medical License / Reg No.</th>
+          <th>Submitted Application</th>
+          <th style="text-align: right;">Review Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for doc in doctors %}
+        <tr>
+          <td>
+            <div style="font-weight: 600; color: #0f172a;">{{ doc.Name|dr }}</div>
+            <small class="text-muted">{{ doc.Email }}</small>
+          </td>
+          <td>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+              {{ doc.SpecializationID }}
+            </span>
+          </td>
+          <td>
+            <code style="font-size: 0.9rem; color: #1e3a8a;">{{ doc.RegistrationNumber }}</code>
+          </td>
+          <td>
+            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
+              <i class="bi bi-hourglass-split me-1"></i> Pending Verification
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <div class="d-inline-flex gap-2">
+              <form method="POST" action="{{ url_for('admin.approve_doctor', id=doc.DoctorID) }}" class="d-inline">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <button class="btn btn-sm btn-success">Approve</button>
-            </form>
-            <form method="POST" action="{{ url_for('admin.reject_doctor', id=doc.DoctorID) }}" class="d-inline">
+                <button type="submit" class="mt-btn mt-btn-primary mt-btn-sm">
+                  <i class="bi bi-check-lg me-1"></i> Approve
+                </button>
+              </form>
+              <form method="POST" action="{{ url_for('admin.reject_doctor', id=doc.DoctorID) }}" class="d-inline"
+                    onsubmit="return confirm('Are you sure you want to reject this doctor application?');">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <button class="btn btn-sm btn-danger">Reject</button>
-            </form>
-        </td>
-    </tr>
-    {% else %}
-    <tr><td colspan="5">No pending doctors.</td></tr>
-    {% endfor %}
-</table>
+                <button type="submit" class="mt-btn mt-btn-outline mt-btn-sm text-danger border-danger">
+                  <i class="bi bi-x-lg me-1"></i> Reject
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="mt-empty py-5">
+    <i class="bi bi-patch-check fs-1 text-success d-block mb-3"></i>
+    <h5>All Clear!</h5>
+    <p class="text-muted">No physician registrations are pending verification at this time.</p>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

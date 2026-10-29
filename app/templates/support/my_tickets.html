@@ -1,9 +1,86 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">My Tickets</h1>
-<table class="table">
-    <tr><th>Subject</th><th>Category</th><th>Priority</th><th>Status</th><th>Date</th></tr>
-    {% for ticket in tickets %}
-    <tr><td>{{ ticket.Subject }}</td><td>{{ ticket.Category }}</td><td>{{ ticket.Priority }}</td><td><span class="badge bg-secondary">{{ ticket.Status }}</span></td><td>{{ ticket.CreatedAt }}</td></tr>
-    {% endfor %}
-</table>
+{% extends "base.html" %}
+{% block page_title %}My Support Tickets - MedTrack{% endblock %}
+
+{% block content %}
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">My Support Requests</h1>
+    <p class="mt-page-subtitle">Track the resolution progress of your inquiries and technical issues.</p>
+  </div>
+  <div class="mt-header-actions">
+    <a href="{{ url_for('support.new_ticket') }}" class="mt-btn mt-btn-primary">
+      <i class="bi bi-plus-circle me-1"></i> New Ticket
+    </a>
+  </div>
+</div>
+
+<div class="mt-card" style="padding: 0; overflow: hidden;">
+  <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+    <h3 style="margin: 0; font-size: 1rem; font-weight: 600;">
+      <i class="bi bi-ticket-perforated text-primary me-2"></i>Submitted Inquiries
+    </h3>
+    <span class="badge bg-secondary">{{ tickets|length }} ticket{% if tickets|length != 1 %}s{% endif %}</span>
+  </div>
+
+  {% if tickets %}
+  <div class="table-responsive">
+    <table class="mt-table">
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Category</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Submitted Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ticket in tickets %}
+        <tr>
+          <td>
+            <strong style="color: #0f172a;">{{ ticket.Subject }}</strong>
+            <div class="text-muted small">ID: #{{ ticket.TicketID[:8] if ticket.TicketID else '' }}</div>
+          </td>
+          <td>
+            <span class="badge bg-light text-dark border">{{ ticket.Category }}</span>
+          </td>
+          <td>
+            {% if ticket.Priority == 'High' or ticket.Priority == 'Critical' %}
+              <span class="badge bg-danger-subtle text-danger border border-danger-subtle">High</span>
+            {% elif ticket.Priority == 'Medium' %}
+              <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Medium</span>
+            {% else %}
+              <span class="badge bg-info-subtle text-info border border-info-subtle">Low</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if ticket.Status == 'Resolved' %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle">
+                <i class="bi bi-check-circle me-1"></i> Resolved
+              </span>
+            {% else %}
+              <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                <i class="bi bi-exclamation-circle me-1"></i> Open
+              </span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="text-muted small">{{ ticket.CreatedAt[:10] if ticket.CreatedAt else 'N/A' }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="mt-empty py-5">
+    <i class="bi bi-ticket-detailed fs-1 text-muted d-block mb-3"></i>
+    <h5>No Support Tickets</h5>
+    <p class="text-muted">You have not submitted any support tickets yet.</p>
+    <a href="{{ url_for('support.new_ticket') }}" class="mt-btn mt-btn-primary mt-2">
+      <i class="bi bi-plus-circle me-1"></i> Open a Ticket
+    </a>
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

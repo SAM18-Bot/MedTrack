@@ -1,12 +1,94 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">Availability Manager</h1>
-<p>Select a date and working hours to automatically generate bookable slots.</p>
-<form method="POST" class="w-50 card p-4 shadow-sm border-0">
-    {{ form.hidden_tag() }}
-    {{ form.date.label }} {{ form.date(class="form-control mb-3", placeholder="YYYY-MM-DD") }}
-    {{ form.start_time.label }} {{ form.start_time(class="form-control mb-3", placeholder="09:00") }}
-    {{ form.end_time.label }} {{ form.end_time(class="form-control mb-3", placeholder="17:00") }}
-    {{ form.slot_duration.label }} {{ form.slot_duration(class="form-control mb-3") }}
-    {{ form.submit(class="btn btn-primary") }}
-</form>
+{% extends "base.html" %}
+{% block page_title %}Doctor Availability - MedTrack{% endblock %}
+
+{% block content %}
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">Manage Practice Availability</h1>
+    <p class="mt-page-subtitle">Configure consultation dates, working hours, and slot intervals for patient bookings.</p>
+  </div>
+  <div class="mt-header-actions">
+    <a href="{{ url_for('doctor.queue') }}" class="mt-btn mt-btn-outline">
+      <i class="bi bi-clock"></i> Today's Queue
+    </a>
+  </div>
+</div>
+
+<div class="row g-4 justify-content-center">
+  <div class="col-lg-6">
+    <div class="mt-card">
+      <h3 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">
+        <i class="bi bi-calendar2-range text-primary me-2"></i>Generate Time Slots
+      </h3>
+      <p class="text-muted small mb-4">Set your active clinic hours for a given date. Available slots will be generated automatically.</p>
+
+      <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+          <label class="form-label" style="font-weight: 500;">Practice Date</label>
+          {{ form.date(class="form-control", placeholder="YYYY-MM-DD", type="date") }}
+          {% for error in form.date.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label" style="font-weight: 500;">Shift Start Time</label>
+            {{ form.start_time(class="form-control", placeholder="09:00", type="time") }}
+            {% for error in form.start_time.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" style="font-weight: 500;">Shift End Time</label>
+            {{ form.end_time(class="form-control", placeholder="17:00", type="time") }}
+            {% for error in form.end_time.errors %}
+              <div class="text-danger small mt-1">{{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" style="font-weight: 500;">Slot Duration (Minutes)</label>
+          {{ form.slot_duration(class="form-select") }}
+          <div class="form-text small">Recommended consultation interval is 30 minutes.</div>
+          {% for error in form.slot_duration.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+          <a href="{{ url_for('doctor.dashboard') }}" class="mt-btn mt-btn-outline">Cancel</a>
+          <button type="submit" class="mt-btn mt-btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Publish Available Slots
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="mt-card mb-4 bg-light">
+      <h4 style="font-size: 1rem; font-weight: 600; color: #1e293b; margin-bottom: 0.75rem;">
+        <i class="bi bi-shield-check text-success me-2"></i>Automated Conflict Prevention
+      </h4>
+      <p class="text-muted small mb-0">
+        MedTrack guarantees transactional slot reservation in AWS DynamoDB with atomic condition expressions, preventing double-booking across simultaneous patient checkout requests.
+      </p>
+    </div>
+
+    <div class="mt-card">
+      <h4 style="font-size: 1rem; font-weight: 600; color: #1e293b; margin-bottom: 0.75rem;">
+        <i class="bi bi-lightbulb text-warning me-2"></i>Pro-Tips for Practice Hours
+      </h4>
+      <ul class="text-muted small ps-3 mb-0" style="line-height: 1.8;">
+        <li>Set recurring hours at the start of each week.</li>
+        <li>Leave 15-minute buffers during high-traffic shifts.</li>
+        <li>Update clinic address on your profile so patients receive accurate facility locations.</li>
+      </ul>
+    </div>
+  </div>
+</div>
 {% endblock %}

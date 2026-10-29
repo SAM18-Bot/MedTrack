@@ -1,15 +1,95 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">Manage Specializations</h1>
-<form method="POST" class="mb-5 card p-3 shadow-sm border-0 w-50">
-    {{ form.hidden_tag() }}
-    {{ form.name.label }} {{ form.name(class="form-control mb-2") }}
-    {{ form.description.label }} {{ form.description(class="form-control mb-3") }}
-    {{ form.submit(class="btn btn-primary") }}
-</form>
-<table class="table table-striped">
-    <tr><th>Specialization</th><th>Description</th></tr>
-    {% for s in specializations %}
-    <tr><td>{{ s.Name }}</td><td>{{ s.Description }}</td></tr>
-    {% endfor %}
-</table>
+{% extends "base.html" %}
+{% block page_title %}Medical Specialties - MedTrack{% endblock %}
+
+{% block content %}
+<div class="mt-page-header">
+  <div>
+    <h1 class="mt-page-title">Medical Specialties & Departments</h1>
+    <p class="mt-page-subtitle">Configure clinical specialization taxonomy for doctor registrations and patient search filters.</p>
+  </div>
+  <div class="mt-header-actions">
+    <a href="{{ url_for('admin.dashboard') }}" class="mt-btn mt-btn-outline">
+      <i class="bi bi-shield-lock"></i> Admin Console
+    </a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Add New Specialty Form -->
+  <div class="col-lg-4">
+    <div class="mt-card h-100">
+      <h3 style="font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-bottom: 0.5rem;">
+        <i class="bi bi-plus-circle text-primary me-2"></i>Add Specialty
+      </h3>
+      <p class="text-muted small mb-3">Register a new medical department or specialty discipline.</p>
+
+      <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+          <label class="form-label" style="font-weight: 500;">Specialty Name</label>
+          {{ form.name(class="form-control", placeholder="e.g. Neurology, Pediatrics") }}
+          {% for error in form.name.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label" style="font-weight: 500;">Clinical Scope / Description</label>
+          {{ form.description(class="form-control", rows="3", placeholder="Scope of conditions diagnosed and treated...") }}
+          {% for error in form.description.errors %}
+            <div class="text-danger small mt-1">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <button type="submit" class="mt-btn mt-btn-primary w-100">
+          <i class="bi bi-plus-lg me-1"></i> Add Specialty
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Specializations List -->
+  <div class="col-lg-8">
+    <div class="mt-card h-100" style="padding: 0; overflow: hidden;">
+      <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+        <h3 style="margin: 0; font-size: 1rem; font-weight: 600;">
+          <i class="bi bi-diagram-3 text-primary me-2"></i>Active Specialties
+        </h3>
+        <span class="badge bg-secondary">{{ specializations|length }} total</span>
+      </div>
+
+      {% if specializations %}
+      <div class="table-responsive">
+        <table class="mt-table">
+          <thead>
+            <tr>
+              <th>Specialty</th>
+              <th>Clinical Scope Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in specializations %}
+            <tr>
+              <td>
+                <div style="font-weight: 600; color: #0f172a;">
+                  <i class="bi bi-hospital me-2 text-primary"></i>{{ s.Name }}
+                </div>
+              </td>
+              <td>
+                <span style="color: #475569; font-size: 0.9rem;">{{ s.Description or 'Standard medical care department.' }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="mt-empty py-4">
+        <i class="bi bi-hospital fs-2 text-muted d-block mb-2"></i>
+        <p class="text-muted mb-0">No specialties added yet. Use the form on the left to add one.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
 {% endblock %}

@@ -1,21 +1,79 @@
-{% extends 'base.html' %}{% block content %}
-<h1 class="mb-4">My Appointments</h1>
-<table class="table table-striped">
-    <tr><th>Doctor ID</th><th>Date/Time</th><th>Status</th><th>Actions</th></tr>
-    {% for appt in appointments %}
-    <tr>
-        <td>{{ appt.DoctorID }}</td>
-        <td>{{ appt.ScheduledAt }}</td>
-        <td><span class="badge bg-primary">{{ appt.Status }}</span></td>
-        <td>
-            {% if appt.Status == 'Pending' or appt.Status == 'Confirmed' %}
-            <form method="POST" action="{{ url_for('patient.cancel_appointment', id=appt.AppointmentID) }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
-            </form>
+{% extends "base.html" %}
+{% block page_title %}Appointments Schedule{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+  <div>
+    <h2 class="mt-display mb-1" style="font-family: var(--font-display); font-weight: 700;">Appointments Schedule</h2>
+    <p style="color:var(--mt-ink-soft); margin:0;">Filter and manage your clinical consultations across all statuses.</p>
+  </div>
+  <div>
+    <a href="{{ url_for('patient.doctors') }}" class="mt-btn mt-btn-primary">
+      <i class="bi bi-calendar-plus"></i> Book new visit
+    </a>
+  </div>
+</div>
+
+{% if appointments %}
+<div class="mt-card p-4">
+  <div class="mt-table-wrap">
+    <table class="mt-table">
+      <thead>
+        <tr>
+          <th>Healthcare Provider</th>
+          <th>Consultation Date & Time</th>
+          <th>Reason</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in appointments %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="mt-avatar mt-avatar-sm" style="width:34px;height:34px;font-size:0.85rem;">Dr</div>
+              <div>
+                <span class="fw-semibold">Dr. Specialist</span>
+                <div class="text-muted small">Doctor ID: {{ a.DoctorID }}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{ a.ScheduledAt }}</td>
+          <td>{{ a.Reason or 'Clinical Consultation' }}</td>
+          <td>
+            {% if a.Status == 'Completed' %}
+              <span class="badge bg-success-subtle text-success border border-success-subtle">Completed</span>
+            {% elif a.Status == 'Confirmed' %}
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Confirmed</span>
+            {% elif a.Status == 'Cancelled' %}
+              <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Cancelled</span>
+            {% else %}
+              <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pending</span>
             {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+          </td>
+          <td>
+            {% if a.Status in ['Pending', 'Confirmed', 'Scheduled'] %}
+              <form method="POST" action="{{ url_for('patient.cancel_appointment', id=a.AppointmentID) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2">Cancel</button>
+              </form>
+            {% else %}
+              <span class="text-muted small">&mdash;</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="mt-empty py-5 text-center">
+  <i class="bi bi-calendar-x fs-1 text-muted mb-2 d-block"></i>
+  <p class="text-muted mb-3">No appointments found in your record.</p>
+  <a href="{{ url_for('patient.doctors') }}" class="btn btn-primary">Book an Appointment</a>
+</div>
+{% endif %}
+
 {% endblock %}

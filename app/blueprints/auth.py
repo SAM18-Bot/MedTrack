@@ -23,6 +23,14 @@ def login():
                 session.permanent = True
             flash("Logged in successfully.", "success")
             
+            next_page = request.args.get('next')
+            from urllib.parse import urlparse, urljoin
+            if next_page:
+                ref_url = urlparse(request.host_url)
+                test_url = urlparse(urljoin(request.host_url, next_page))
+                if test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc:
+                    return redirect(next_page)
+                    
             if user['Role'] == 'Admin':
                 return redirect(url_for('admin.dashboard'))
             elif user['Role'] == 'Doctor':
@@ -32,6 +40,43 @@ def login():
         except ValueError as e:
             flash(str(e), "danger")
     return render_template('auth/login.html', form=form)
+
+@auth_bp.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        role = request.form.get('role', 'patient').strip().lower()
+        specialization = request.form.get('specialization', 'General Medicine').strip()
+        phone = request.form.get('phone', '').strip() or '+1000000000'
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        if not name or not email or not password:
+            flash("All required fields must be filled.", "danger")
+            return render_template('auth/signup.html', name=name, email=email, role=role, specialization=specialization, phone=phone)
+
+        if password != confirm_password:
+            flash("Passwords do not match.", "danger")
+            return render_template('auth/signup.html', name=name, email=email, role=role, specialization=specialization, phone=phone)
+
+        if len(password) < 8:
+            flash("Password must be at least 8 characters long.", "danger")
+            return render_template('auth/signup.html', name=name, email=email, role=role, specialization=specialization, phone=phone)
+
+        try:
+            if role == 'doctor':
+                auth_service.register_doctor(name, email, phone, specialization, 'REG-' + email.split('@')[0], password)
+                flash("Doctor registration submitted! Your account is pending admin approval.", "success")
+            else:
+                auth_service.register_patient(name, email, phone, password)
+                flash("Patient registration successful! Please log in.", "success")
+            return redirect(url_for('auth.login'))
+        except ValueError as e:
+            flash(str(e), "danger")
+            return render_template('auth/signup.html', name=name, email=email, role=role, specialization=specialization, phone=phone)
+
+    return render_template('auth/signup.html')
 
 @auth_bp.route('/register/patient', methods=['GET', 'POST'])
 def register_patient():
@@ -61,13 +106,14 @@ def register_doctor():
     return render_template('auth/register_doctor.html', form=form)
 
 @auth_bp.route('/forgot-password', methods=['GET', 'POST'])
-@limiter.limit("3 per minute")
+@limiter.limit("5 per minute")
 def forgot_password():
     form = ForgotPasswordForm()
     if form.validate_on_submit():
         auth_service.generate_otp(form.email.data)
         flash("If the email exists, an OTP has been sent.", "info")
-        return redirect(url_for('auth.reset_password', email=form.email.data))
+        session['reset_email'] = form.email.data
+        return redirect(url_for('auth.reset_password'))
     return render_template('auth/forgot_password.html', form=form)
 
 @auth_bp.route('/reset-password', methods=['GET', 'POST'])
@@ -75,7 +121,7 @@ def forgot_password():
 def reset_password():
     form = ResetPasswordForm()
     if request.method == 'GET':
-        form.email.data = request.args.get('email', '')
+        form.email.data = session.pop('reset_email', '')
     if form.validate_on_submit():
         try:
             auth_service.reset_password(form.email.data, form.otp.data, form.new_password.data)
@@ -97,7 +143,5 @@ def history():
         return redirect(url_for('auth.login'))
     from app.repositories.login_history_repository import LoginHistoryRepository
     repo = LoginHistoryRepository()
-    logs = repo.get_history(session['user_id'])
-    return render_template('auth/login_history.html', logs=logs)
-
-
+    records = repo.get_history(session['user_id'])
+    return render_template('auth/login_history.html', history=records)
