@@ -1,13 +1,42 @@
 {% extends "base.html" %}
 {% block content %}
-<h2 class="text-center">Log In</h2>
-<form method="POST" class="w-50 mx-auto">
-{{ form.hidden_tag() }}
-{{ form.email.label }} {{ form.email(class="form-control") }}
-{{ form.password.label }} {{ form.password(class="form-control") }}
-{{ form.remember_me() }} {{ form.remember_me.label }}
-<br><br>
-{{ form.submit(class="btn btn-primary") }}
-<div><a href="{{ url_for('auth.forgot_password') }}">Forgot Password?</a></div>
-</form>
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0 p-4">
+            <h2 class="text-center mb-4">Log In</h2>
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                
+                <div class="mb-3">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="admin@medtrack.local") }}
+                    {% for err in form.email.errors %}
+                        <div class="invalid-feedback d-block">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), placeholder="••••••••") }}
+                    {% for err in form.password.errors %}
+                        <div class="invalid-feedback d-block">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3 form-check">
+                    {{ form.remember_me(class="form-check-input", id="remember_me") }}
+                    {{ form.remember_me.label(class="form-check-label", for="remember_me") }}
+                </div>
+
+                <div class="d-grid gap-2">
+                    {{ form.submit(class="btn btn-primary btn-lg") }}
+                </div>
+
+                <div class="mt-3 text-center">
+                    <a href="{{ url_for('auth.forgot_password') }}" class="text-muted text-decoration-none small">Forgot Password?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
